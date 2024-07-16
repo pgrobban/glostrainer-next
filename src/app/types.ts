@@ -1,4 +1,4 @@
-const WordClasses = [
+export const WordClasses = [
   "Noun",
   "Verb",
   "Adjective",

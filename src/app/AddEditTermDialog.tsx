@@ -9,9 +9,13 @@ import {
   Typography,
   useTheme,
   Divider,
+  Select,
+  FormControl,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Conjugation, Term } from "./types";
+import { Conjugation, Term, WordClasses, WordClassType } from "./types";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,6 +32,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
   const { open, editingTerm, onRequestClose, onSave } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
+  const [wordClass, setWordClass] = useState<WordClassType | "">("");
   const [conjugations, setConjugations] = useState<Conjugation[]>([]);
   const [notes, setNotes] = useState("");
 
@@ -96,6 +101,29 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
             value={definition}
             onChange={(evt) => setDefinition(evt.target.value)}
           />
+
+          <FormControl sx={{ mt: 1 }} required fullWidth>
+            <InputLabel id="word-class-select">Word class</InputLabel>
+
+            <Select
+              id="word-class-select"
+              label="Word class"
+              value={wordClass}
+              onChange={(evt) =>
+                setWordClass(evt.target.value as WordClassType | "")
+              }
+            >
+              <MenuItem value="" disabled>
+                <em>Select a word class</em>
+              </MenuItem>
+              {WordClasses.map((wordClass) => (
+                <MenuItem key={wordClass} value={wordClass}>
+                  {wordClass}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <Divider sx={{ m: 2 }} />
           <Box sx={{ display: "flex" }} justifyContent={"space-between"}>
             <Typography variant="h6">Conjugations</Typography>
@@ -144,7 +172,14 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
             Notes
           </Typography>
 
-          <TextField label="Notes" multiline rows={4} fullWidth />
+          <TextField
+            label="Notes"
+            multiline
+            rows={4}
+            fullWidth
+            value={notes}
+            onChange={(evt) => setNotes(evt.target.value)}
+          />
         </Box>
       </Box>
     </Dialog>
