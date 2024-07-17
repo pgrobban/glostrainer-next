@@ -1,23 +1,39 @@
-import { Typography, Box, Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import AddEditTermDialog from "../components/AddEditTermDialog";
-import { useState } from "react";
-import { Term } from "../helpers/types";
 import TermList from "@/components/TermList";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, Button, Typography } from "@mui/material";
+import { useState } from "react";
 import dummyTermLists from "../../test/dummyTermLists.json";
+import AddEditTermDialog from "../components/AddEditTermDialog";
+import { Term } from "../helpers/types";
+import utilClassInstances from "../helpers/utilClassInstances";
+const { localStorageHelperInstance } = utilClassInstances;
+const defaultData = (
+  localStorageHelperInstance.loadData()[0] || dummyTermLists[0]
+).terms;
 
 const TermListPage: React.FC = () => {
   const [addEditTermDialogOpen, setAddEditTermDialogOpen] = useState(false);
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
-  const [terms, setTerms] = useState<Term[]>(dummyTermLists[0].terms as Term[]);
+  const [terms, setTerms] = useState<Term[]>(defaultData as Term[]);
 
-  const onSave = (term: Term) => {
+  const onSave = (termToSave: Term) => {
+    const newTerms = [...terms];
     if (editingTerm) {
+      const termIndex = terms.findIndex(
+        (term) =>
+          term.swedish === editingTerm.swedish &&
+          term.definition === editingTerm.definition
+      );
+      newTerms.splice(termIndex, 1, termToSave);
+      setTerms(newTerms);
     } else {
-      setTerms([...terms, term]);
+      newTerms.push(termToSave);
+      setTerms(newTerms);
     }
-    setEditingTerm(null);
+    saveLocalData(newTerms);
     setAddEditTermDialogOpen(false);
+    setTimeout(() => setEditingTerm(null), 500); // don't show the title change too quickly
   };
 
   const editTerm = (term: Term) => {
@@ -34,6 +50,22 @@ const TermListPage: React.FC = () => {
     );
     newTerms.splice(termIndex, 1);
     setTerms(newTerms);
+    saveLocalData(newTerms);
+  };
+
+  const onAddTermClick = () => {
+    setEditingTerm(null);
+    setAddEditTermDialogOpen(true);
+  };
+
+  const saveLocalData = (newTerms: Term[]) => {
+    localStorageHelperInstance.saveData([
+      {
+        name: "Default list",
+        createdOn: new Date(),
+        terms: newTerms,
+      },
+    ]);
   };
 
   return (
@@ -48,14 +80,25 @@ const TermListPage: React.FC = () => {
           Term list
         </Typography>
 
-        <Box justifyContent={"space-between"}>
+        <Box display={"flex"} justifyContent={"space-between"}>
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setAddEditTermDialogOpen(true)}
+            onClick={onAddTermClick}
           >
             Add term
+          </Button>
+
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<DeleteIcon />}
+            onClick={() => localStorageHelperInstance.clearData()}
+          >
+            Clear ALL local data
+            <br />
+            (REVERT TO DUMMY DATA)
           </Button>
         </Box>
 

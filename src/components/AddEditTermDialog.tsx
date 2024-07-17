@@ -71,16 +71,17 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
   };
 
   useEffect(() => {
-    if (!editingTerm) {
-      return;
-    }
-    setSwedish(editingTerm.swedish);
-    setDefinition(editingTerm.definition);
-    setType(editingTerm.type);
-    setConjugations(editingTerm.conjugations || []);
-    setNotes(editingTerm.notes || "");
-    setIsFormValid(true);
-  }, [editingTerm]);
+    setSwedish(editingTerm?.swedish || "");
+    setDefinition(editingTerm?.definition || "");
+    setType(editingTerm?.type || "");
+    setConjugations(editingTerm?.conjugations || []);
+    setNotes(editingTerm?.notes || "");
+    setIsFormValid(!!editingTerm);
+  }, [editingTerm, open]);
+
+  useEffect(() => {
+    setIsFormValid(!!(swedish.trim() && definition.trim() && type));
+  }, [swedish, definition, type]);
 
   return (
     <Dialog

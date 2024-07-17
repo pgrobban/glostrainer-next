@@ -26,7 +26,7 @@ export interface Term {
 }
 
 export interface TermList {
-  terms: [];
+  terms: Term[];
   name: string;
   createdOn: Date;
   updatedOn?: Date;

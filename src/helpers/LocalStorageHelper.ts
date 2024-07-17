@@ -4,6 +4,10 @@ export default class LocalStorageHelper {
   private cachedTermLists: TermList[] = [];
   static LOCAL_STORAGE_KEY = "termLists";
 
+  constructor() {
+    this.loadData();
+  }
+
   loadData() {
     const localData =
       localStorage.getItem(LocalStorageHelper.LOCAL_STORAGE_KEY) || "[]";
@@ -22,5 +26,10 @@ export default class LocalStorageHelper {
       LocalStorageHelper.LOCAL_STORAGE_KEY,
       JSON.stringify(termLists)
     );
+  }
+
+  clearData() {
+    localStorage.removeItem(LocalStorageHelper.LOCAL_STORAGE_KEY);
+    window.location.reload();
   }
 }
