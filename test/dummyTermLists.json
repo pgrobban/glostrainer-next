@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Test list 1",
+    "createdOn": "2024-07-17T15:56:05.864Z",
+    "terms": [
+      {
+        "swedish": "Word 1",
+        "definition": "Word 1 in English",
+        "type": "Noun"
+      },
+      {
+        "swedish": "Word 2 with conjugations",
+        "definition": "Some word with conjugations",
+        "type": "Verb",
+        "conjugations": [
+          {
+            "form": "Present tense",
+            "term": "Foo"
+          },
+          {
+            "form": "Past tense",
+            "term": "Bar"
+          },
+          {
+            "form": "Future tense",
+            "term": "Baz"
+          }
+        ]
+      },
+      {
+        "swedish": "Word 3 with notes",
+        "definition": "Some word with notes",
+        "type": "Adjective",
+        "notes": "Blah blah blah"
+      }
+    ]
+  }
+]

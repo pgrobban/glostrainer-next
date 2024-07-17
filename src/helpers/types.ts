@@ -29,5 +29,5 @@ export interface TermList {
   terms: [];
   name: string;
   createdOn: Date;
-  updatedOn: Date;
+  updatedOn?: Date;
 }

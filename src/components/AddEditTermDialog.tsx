@@ -22,13 +22,13 @@ import {
   WordClassType,
 } from "../helpers/types";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Props {
   open: boolean;
-  editingTerm?: Term;
+  editingTerm?: Term | null;
   onRequestClose: () => void;
   onSave: (term: Term) => void;
 }
@@ -37,9 +37,10 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
   const { open, editingTerm, onRequestClose, onSave } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
-  const [wordClass, setWordClass] = useState<WordClassType | "">("");
+  const [type, setType] = useState<WordClassType | "">("");
   const [conjugations, setConjugations] = useState<Conjugation[]>([]);
   const [notes, setNotes] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -57,6 +58,29 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
     conjugations[index][key] = value;
     setConjugations(newConjugations);
   };
+  const onClickSave = () => {
+    if (type === "") {
+      return;
+    }
+    onSave({
+      swedish,
+      definition,
+      type,
+      conjugations,
+    });
+  };
+
+  useEffect(() => {
+    if (!editingTerm) {
+      return;
+    }
+    setSwedish(editingTerm.swedish);
+    setDefinition(editingTerm.definition);
+    setType(editingTerm.type);
+    setConjugations(editingTerm.conjugations || []);
+    setNotes(editingTerm.notes || "");
+    setIsFormValid(true);
+  }, [editingTerm]);
 
   return (
     <Dialog
@@ -79,7 +103,12 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             {editingTerm ? "Edit term" : "Add new term"}
           </Typography>
-          <Button autoFocus color="inherit" onClick={onRequestClose}>
+          <Button
+            autoFocus
+            disabled={!isFormValid}
+            color="inherit"
+            onClick={onClickSave}
+          >
             Save
           </Button>
         </Toolbar>
@@ -113,9 +142,9 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
             <Select
               id="word-class-select"
               label="Word class"
-              value={wordClass}
+              value={type}
               onChange={(evt) =>
-                setWordClass(evt.target.value as WordClassType | "")
+                setType(evt.target.value as WordClassType | "")
               }
             >
               <MenuItem value="" disabled>
