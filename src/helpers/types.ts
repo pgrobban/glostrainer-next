@@ -24,3 +24,10 @@ export interface Term {
   conjugations?: Conjugation[];
   notes?: string;
 }
+
+export interface TermList {
+  terms: [];
+  name: string;
+  createdOn: Date;
+  updatedOn: Date;
+}

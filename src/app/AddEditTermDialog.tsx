@@ -15,7 +15,12 @@ import {
   InputLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Conjugation, Term, WordClasses, WordClassType } from "./types";
+import {
+  Conjugation,
+  Term,
+  WordClasses,
+  WordClassType,
+} from "../helpers/types";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";

@@ -2,9 +2,9 @@ import { Typography, Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AddEditTermDialog from "./AddEditTermDialog";
 import { useState } from "react";
-import { Term } from "./types";
+import { Term } from "../helpers/types";
 
-const TermList: React.FC = () => {
+const TermListPage: React.FC = () => {
   const [addEditTermDialogOpen, setAddEditTermDialogOpen] = useState(false);
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
 
@@ -40,4 +40,4 @@ const TermList: React.FC = () => {
   );
 };
 
-export default TermList;
+export default TermListPage;
