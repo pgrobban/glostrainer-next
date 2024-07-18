@@ -3,14 +3,12 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import dummyTermLists from "../../test/dummyTermLists.json";
 import AddEditTermDialog from "../components/AddEditTermDialog";
 import { Term } from "../helpers/types";
 import utilClassInstances from "../helpers/utilClassInstances";
+
 const { localStorageHelperInstance } = utilClassInstances;
-const defaultData = (
-  localStorageHelperInstance.loadData()[0] || dummyTermLists[0]
-).terms;
+const defaultData = localStorageHelperInstance.getActiveTermList()?.terms || [];
 
 const TermListPage: React.FC = () => {
   const [addEditTermDialogOpen, setAddEditTermDialogOpen] = useState(false);
@@ -59,14 +57,11 @@ const TermListPage: React.FC = () => {
   };
 
   const saveLocalData = (newTerms: Term[]) => {
-    localStorageHelperInstance.saveData([
-      {
-        name: "Default list",
-        createdOn: new Date(),
-        terms: newTerms,
-      },
-    ]);
+    localStorageHelperInstance.updateActiveTermList(newTerms);
+    localStorageHelperInstance.saveData();
   };
+
+  const lastSavedDate = localStorageHelperInstance.getLastSaveDate();
 
   return (
     <>
@@ -79,7 +74,6 @@ const TermListPage: React.FC = () => {
         <Typography sx={{ mb: 1 }} variant="h3">
           Term list
         </Typography>
-
         <Box display={"flex"} justifyContent={"space-between"}>
           <Button
             variant="contained"
@@ -97,16 +91,15 @@ const TermListPage: React.FC = () => {
             onClick={() => localStorageHelperInstance.clearData()}
           >
             Clear ALL local data
-            <br />
-            (REVERT TO DUMMY DATA)
           </Button>
         </Box>
-
         <TermList
           terms={terms}
           onEditTerm={editTerm}
           onDeleteTerm={deleteTerm}
         />
+
+        {lastSavedDate && <> Last saved on {lastSavedDate.toISOString()}</>}
       </Box>
 
       <AddEditTermDialog

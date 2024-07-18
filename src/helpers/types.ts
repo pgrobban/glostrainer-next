@@ -25,9 +25,18 @@ export interface Term {
   notes?: string;
 }
 
+export type UUID = ReturnType<Crypto["randomUUID"]>;
+
 export interface TermList {
+  id: UUID;
   terms: Term[];
   name: string;
   createdOn: Date;
   updatedOn?: Date;
+}
+
+export interface Profile {
+  termLists: TermList[];
+  activeTermListId: UUID | null;
+  lastSave?: Date | null;
 }
