@@ -11,6 +11,7 @@ import {
   tableCellClasses,
   TableContainer,
   Paper,
+  SxProps,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,6 +21,7 @@ interface Props {
   terms: Term[];
   onEditTerm: (term: Term) => void;
   onDeleteTerm: (term: Term) => void;
+  sx?: SxProps;
 }
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -42,10 +44,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const TermList: React.FC<Props> = ({ terms, onEditTerm, onDeleteTerm }) => {
+const TermList: React.FC<Props> = ({ sx, terms, onEditTerm, onDeleteTerm }) => {
   const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
   return (
-    <TableContainer component={Paper}>
+    <TableContainer sx={sx} component={Paper}>
       <Table sx={{ minWidth: 900 }}>
         <TableHead>
           <TableRow>

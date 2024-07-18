@@ -1,5 +1,6 @@
 import { AssertionError } from "assert";
-import { Profile, Term } from "./types";
+import { Profile, Term, TermList } from "./types";
+import { randomUUID } from "crypto";
 
 const defaultProfile = {
   activeTermListId: null,
@@ -41,6 +42,7 @@ export default class LocalStorageHelper {
 
   setActiveTermList(id: string) {
     this.cachedProfile.activeTermListId = id;
+    this.saveData();
   }
 
   saveData() {
@@ -53,7 +55,7 @@ export default class LocalStorageHelper {
 
   clearData() {
     localStorage.removeItem(LocalStorageHelper.LOCAL_STORAGE_KEY);
-    window.location.reload();
+    this.cachedProfile = { ...defaultProfile };
   }
 
   updateActiveTermList(newTerms: Term[]) {
@@ -63,9 +65,22 @@ export default class LocalStorageHelper {
     }
     termList.terms = newTerms;
     termList.updatedOn = new Date();
+    this.saveData();
   }
 
   getLastSaveDate() {
     return this.cachedProfile.lastSave;
+  }
+
+  createNewTermList(name: string) {
+    const newTermList: TermList = {
+      id: crypto.randomUUID(),
+      name,
+      createdOn: new Date(),
+      terms: [],
+    };
+    this.cachedProfile.termLists.push(newTermList);
+    this.setActiveTermList(newTermList.id);
+    return newTermList;
   }
 }

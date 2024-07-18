@@ -25,6 +25,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import utilClassInstances from "../helpers/utilClassInstances";
+const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props {
   open: boolean;
@@ -103,7 +105,11 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
             <CloseIcon />
           </IconButton>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            {editingTerm ? "Edit term" : "Add new term"}
+            {editingTerm
+              ? "Edit term"
+              : `Add new term to list '${
+                  localStorageHelperInstance.getActiveTermList()?.name
+                }'`}
           </Typography>
           <Button
             autoFocus
