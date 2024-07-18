@@ -85,6 +85,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
 
   return (
     <Dialog
+      onClose={onRequestClose}
       open={open}
       fullScreen={fullScreen}
       sx={{
