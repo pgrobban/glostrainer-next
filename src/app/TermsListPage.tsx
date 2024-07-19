@@ -1,7 +1,6 @@
-import TermList from "@/components/TermList";
+import AddEditTermListDialog from "@/components/AddEditTermListDialog";
 import AddIcon from "@mui/icons-material/Add";
 import AddToListIcon from "@mui/icons-material/PlaylistAdd";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -11,24 +10,27 @@ import {
   Select,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { UUID } from "crypto";
+import { useEffect, useState } from "react";
 import AddEditTermDialog from "../components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "../helpers/utilClassInstances";
-import AddEditTermListDialog from "@/components/AddEditTermListDialog";
+import TermList from "@/components/TermList";
 
 const { localStorageHelperInstance } = utilClassInstances;
-const defaultData = localStorageHelperInstance.getActiveTermList()?.terms || [];
 
 const TermListPage: React.FC = () => {
   const [addEditTermDialogOpen, setAddEditTermDialogOpen] = useState(false);
   const [addEditTermListDialogOpen, setAddEditTermListDialogOpen] =
     useState(false);
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
-  const [terms, setTerms] = useState<Term[]>(defaultData as Term[]);
-  const [activeTermListId, setActiveTermListId] = useState(
-    localStorageHelperInstance.getActiveTermListId()
-  );
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [activeTermListId, setActiveTermListId] = useState<UUID | null>(null);
+
+  useEffect(() => {
+    setActiveTermListId(localStorageHelperInstance.getActiveTermListId());
+    setTerms(localStorageHelperInstance.getActiveTermList()?.terms || []);
+  }, []);
 
   const onSave = (termToSave: Term) => {
     const newTerms = [...terms];
@@ -84,12 +86,14 @@ const TermListPage: React.FC = () => {
     setAddEditTermListDialogOpen(false);
   };
 
+  /*
   const onClearDataClick = () => {
     localStorageHelperInstance.clearData();
     setActiveTermListId(null);
   };
+  */
 
-  const onActiveListIdChanged = (newActiveTermListId: string) => {
+  const onActiveListIdChanged = (newActiveTermListId: UUID) => {
     setActiveTermListId(newActiveTermListId);
     localStorageHelperInstance.setActiveTermList(newActiveTermListId);
     setTerms(localStorageHelperInstance.getActiveTermList()!.terms);
@@ -125,14 +129,14 @@ const TermListPage: React.FC = () => {
               </Button>
             </Box>
           )}
-          {cachedTermLists.length > 0 && (
+          {cachedTermLists.length > 0 && activeTermListId && (
             <FormControl>
               <InputLabel id="term-list-select">Active list</InputLabel>
               <Select
                 style={{ minWidth: 200 }}
                 value={activeTermListId}
                 onChange={(evt) =>
-                  onActiveListIdChanged(evt.target.value as string)
+                  onActiveListIdChanged(evt.target.value as UUID)
                 }
                 labelId="term-list-select"
                 label="Active list"
@@ -182,7 +186,7 @@ const TermListPage: React.FC = () => {
         {lastSavedDate && (
           <Typography fontSize={"small"}>
             {" "}
-            Last saved on {new Date(lastSavedDate).toISOString()}
+            Last saved on {new Date(lastSavedDate).toLocaleString()}
           </Typography>
         )}
       </Box>

@@ -1,3 +1,5 @@
+import { UUID } from "crypto";
+
 export const WordClasses = [
   "Noun",
   "Verb",
@@ -24,8 +26,6 @@ export interface Term {
   conjugations?: Conjugation[];
   notes?: string;
 }
-
-export type UUID = ReturnType<Crypto["randomUUID"]>;
 
 export interface TermList {
   id: UUID;

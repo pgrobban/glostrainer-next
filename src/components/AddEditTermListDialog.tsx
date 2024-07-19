@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 
 const { localStorageHelperInstance } = utilClassInstances;
+const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
 interface Props {
   open: boolean;
@@ -42,7 +43,7 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
   }, [mode, open]);
 
   useEffect(() => {
-    setIsFormValid(name.length > 3);
+    setIsFormValid(name.length >= MINIMUM_TERM_LIST_NAME_LENGTH);
   }, [name]);
 
   const onClickSave = () => {
@@ -74,10 +75,11 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
           fullWidth
           value={name}
           onChange={(evt) => setName(evt.target.value)}
+          helperText={`Minimum ${MINIMUM_TERM_LIST_NAME_LENGTH} characters`}
         />
       </DialogContent>
       <DialogActions>
-        <Button disabled={isFormValid} onClick={onClickSave}>
+        <Button disabled={!isFormValid} onClick={onClickSave}>
           Create
         </Button>
       </DialogActions>

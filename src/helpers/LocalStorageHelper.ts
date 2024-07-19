@@ -1,6 +1,8 @@
+"use client";
 import { AssertionError } from "assert";
 import { Profile, Term, TermList } from "./types";
-import { randomUUID } from "crypto";
+import { v4 as uuid } from "uuid";
+import { UUID } from "crypto";
 
 const defaultProfile = {
   activeTermListId: null,
@@ -17,6 +19,9 @@ export default class LocalStorageHelper {
   }
 
   loadData() {
+    if (!global.window) {
+      return;
+    }
     const localData = localStorage.getItem(
       LocalStorageHelper.LOCAL_STORAGE_KEY
     );
@@ -40,7 +45,7 @@ export default class LocalStorageHelper {
     return this.cachedProfile.termLists;
   }
 
-  setActiveTermList(id: string) {
+  setActiveTermList(id: UUID) {
     this.cachedProfile.activeTermListId = id;
     this.saveData();
   }
@@ -74,7 +79,7 @@ export default class LocalStorageHelper {
 
   createNewTermList(name: string) {
     const newTermList: TermList = {
-      id: crypto.randomUUID(),
+      id: uuid() as UUID,
       name,
       createdOn: new Date(),
       terms: [],
