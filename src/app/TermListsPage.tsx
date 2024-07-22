@@ -1,35 +1,30 @@
 "use client";
 import AddEditTermListDialog from "@/components/AddEditTermListDialog";
-import AddIcon from "@mui/icons-material/Add";
+import TermList from "@/components/TermList";
+import DeleteIcon from "@mui/icons-material/Delete";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import {
   Box,
   Button,
   Collapse,
-  FormControl,
   IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
+import { DateTime } from "ts-luxon";
 import AddEditTermDialog from "../components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "../helpers/utilClassInstances";
-import TermList from "@/components/TermList";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { DateTime } from "ts-luxon";
+import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -40,7 +35,12 @@ const TermListPage: React.FC = () => {
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
   const [terms, setTerms] = useState<Term[]>([]);
   const [activeTermListId, setActiveTermListId] = useState<UUID | null>(null);
+  const [editingTermListId, setEditingTermListId] = useState<UUID | null>(null);
   const [cachedTermLists, setCachedTermLists] = useState<TermListType[]>([]);
+  const [termListToDeleteId, setTermListToDeleteId] = useState<UUID | null>(
+    null
+  );
+  const [termListToDeleteName, setTermListToDeleteName] = useState("");
 
   useEffect(() => {
     setActiveTermListId(localStorageHelperInstance.getActiveTermListId());
@@ -97,9 +97,25 @@ const TermListPage: React.FC = () => {
     localStorageHelperInstance.updateActiveTermList(newTerms);
   };
 
-  const onNewTermListSaved = (newTermList: TermListType) => {
-    setActiveTermListId(newTermList.id);
+  const onTermListSaved = (newTermList: TermListType) => {
+    if (editingTermListId) {
+      setEditingTermListId(null);
+    } else {
+      setActiveTermListId(newTermList.id);
+    }
     setAddEditTermListDialogOpen(false);
+  };
+
+  const onTermListDeleted = () => {
+    if (!termListToDeleteId) {
+      return;
+    }
+    if (termListToDeleteId === activeTermListId) {
+      setActiveTermListId(null);
+    }
+    localStorageHelperInstance.deleteTermList(termListToDeleteId);
+    setCachedTermLists(localStorageHelperInstance.getCachedTermLists());
+    setTermListToDeleteId(null);
   };
 
   /*
@@ -108,8 +124,6 @@ const TermListPage: React.FC = () => {
     setActiveTermListId(null);
   };
   */
-
-  const onDeleteTermList = (id: UUID) => {};
 
   const TermListRow = (props: { termList: TermListType }) => {
     const { id, name, terms, updatedOn } = props.termList;
@@ -147,7 +161,15 @@ const TermListPage: React.FC = () => {
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
-          <TableCell component="th" scope="row">
+          <TableCell
+            component="th"
+            scope="row"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingTermListId(id);
+              setAddEditTermListDialogOpen(true);
+            }}
+          >
             {name}
           </TableCell>
           <TableCell>{terms.length}</TableCell>
@@ -163,7 +185,14 @@ const TermListPage: React.FC = () => {
               : ""}
           </TableCell>
           <TableCell>
-            <IconButton color="secondary" onClick={() => onDeleteTermList(id)}>
+            <IconButton
+              color="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                setTermListToDeleteId(id);
+                setTermListToDeleteName(name);
+              }}
+            >
               <DeleteIcon />
             </IconButton>
           </TableCell>
@@ -237,9 +266,17 @@ const TermListPage: React.FC = () => {
 
       <AddEditTermListDialog
         open={addEditTermListDialogOpen}
-        mode="add"
+        mode={editingTermListId ? "edit" : "add"}
         onRequestClose={() => setAddEditTermListDialogOpen(false)}
-        onSave={onNewTermListSaved}
+        onSave={onTermListSaved}
+        editingTermListId={editingTermListId}
+      />
+
+      <ConfirmDeleteTermListDialog
+        open={!!termListToDeleteId}
+        onClose={() => setTermListToDeleteId(null)}
+        onConfirm={onTermListDeleted}
+        termListName={termListToDeleteName}
       />
     </>
   );

@@ -50,6 +50,27 @@ export default class LocalStorageHelper {
     this.saveData();
   }
 
+  deleteTermList(id: UUID) {
+    this.cachedProfile.termLists = this.cachedProfile.termLists.filter(
+      (termList) => termList.id !== id
+    );
+    this.saveData();
+  }
+
+  rename(id: UUID, newName: string) {
+    const list = this.getListById(id);
+    if (!list) {
+      return;
+    }
+    list.name = newName;
+    this.saveData();
+    return list; // todo: better
+  }
+
+  getListById(id: UUID) {
+    return this.cachedProfile.termLists.find((list) => list.id === id);
+  }
+
   saveData() {
     this.cachedProfile.lastSave = new Date();
     localStorage.setItem(

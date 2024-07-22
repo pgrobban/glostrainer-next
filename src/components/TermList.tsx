@@ -94,7 +94,7 @@ const TermList: React.FC<Props> = ({
           <TableRow>
             <TableRow>
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 startIcon={<AddIcon />}
                 onClick={onAddTermClick}

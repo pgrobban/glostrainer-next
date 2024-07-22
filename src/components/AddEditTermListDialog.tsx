@@ -11,6 +11,7 @@ import {
 import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { UUID } from "crypto";
 
 const { localStorageHelperInstance } = utilClassInstances;
 const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
@@ -20,10 +21,11 @@ interface Props {
   mode: "add" | "edit";
   onRequestClose: () => void;
   onSave: (newTermList: TermList) => void;
+  editingTermListId: UUID | null;
 }
 
 const AddEditTermListDialog: React.FC<Props> = (props) => {
-  const { open, mode, onRequestClose, onSave } = props;
+  const { open, mode, onRequestClose, onSave, editingTermListId } = props;
 
   const [name, setName] = useState(
     mode === "add"
@@ -34,27 +36,39 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
   useEffect(() => {
     if (open) {
       setName(
-        mode === "add"
+        mode === "add" || !editingTermListId
           ? ""
-          : localStorageHelperInstance.getActiveTermList()?.name || ""
+          : localStorageHelperInstance.getListById(editingTermListId)?.name ||
+              ""
       );
       setIsFormValid(mode === "edit");
     }
-  }, [mode, open]);
+  }, [mode, open, editingTermListId]);
 
   useEffect(() => {
     setIsFormValid(name.length >= MINIMUM_TERM_LIST_NAME_LENGTH);
   }, [name]);
 
   const onClickSave = () => {
-    const newTermList = localStorageHelperInstance.createNewTermList(name);
-    onSave(newTermList);
+    if (mode === "add") {
+      const newTermList = localStorageHelperInstance.createNewTermList(name);
+      onSave(newTermList);
+    } else {
+      if (!editingTermListId) {
+        return;
+      }
+      const newTermList = localStorageHelperInstance.rename(
+        editingTermListId,
+        name
+      )!;
+      onSave(newTermList);
+    }
   };
 
   return (
     <Dialog open={open} onClose={onRequestClose}>
       <DialogTitle>
-        {mode === "edit" ? "Edit word list" : "Create word list"}
+        {mode === "edit" ? "Edit term list" : "Create term list"}
       </DialogTitle>
       <IconButton
         aria-label="close"
@@ -80,7 +94,7 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
       </DialogContent>
       <DialogActions>
         <Button disabled={!isFormValid} onClick={onClickSave}>
-          Create
+          Save
         </Button>
       </DialogActions>
     </Dialog>
