@@ -17,7 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SwedishFlag from "../../public/images/flag.svg";
 import { useState } from "react";
 import Image from "next/image";
-import WordsList from "./TermsListPage";
+import WordsList from "./TermListsPage";
 
 const pages = ["Terms", "Quiz"] as const;
 const settings = ["Export -NOT WORKING-"];

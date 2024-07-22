@@ -112,6 +112,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                 }'`}
           </Typography>
           <Button
+            type="submit"
             autoFocus
             disabled={!isFormValid}
             color="inherit"

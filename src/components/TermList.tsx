@@ -12,13 +12,15 @@ import {
   TableContainer,
   Paper,
   SxProps,
+  Button,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useState } from "react";
 
 interface Props {
   terms: Term[];
+  onAddTermClick: () => void;
   onEditTerm: (term: Term) => void;
   onDeleteTerm: (term: Term) => void;
   sx?: SxProps;
@@ -44,23 +46,26 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const TermList: React.FC<Props> = ({ sx, terms, onEditTerm, onDeleteTerm }) => {
-  const [expandedIndexes, setExpandedIndexes] = useState<number[]>([]);
+const TermList: React.FC<Props> = ({
+  sx,
+  terms,
+  onAddTermClick,
+  onEditTerm,
+  onDeleteTerm,
+}) => {
   return (
     <TableContainer sx={sx} component={Paper}>
-      <Table sx={{ minWidth: 900 }}>
+      <Table>
         <TableHead>
           <TableRow>
             <StyledTableCell sx={{ fontWeight: 600 }}>Swedish</StyledTableCell>
-            <StyledTableCell sx={{ fontWeight: 600 }} width={200}>
+            <StyledTableCell sx={{ fontWeight: 600 }}>
               Definition
             </StyledTableCell>
-            <StyledTableCell sx={{ fontWeight: 600 }} width={200}>
+            <StyledTableCell sx={{ fontWeight: 600 }}>
               Word class
             </StyledTableCell>
-            <StyledTableCell sx={{ fontWeight: 600 }} width={200}>
-              Notes
-            </StyledTableCell>
+            <StyledTableCell sx={{ fontWeight: 600 }}>Notes</StyledTableCell>
             <StyledTableCell width={100}>{/* actions */}</StyledTableCell>
           </TableRow>
         </TableHead>
@@ -86,6 +91,18 @@ const TermList: React.FC<Props> = ({ sx, terms, onEditTerm, onDeleteTerm }) => {
               </StyledTableCell>
             </StyledTableRow>
           ))}
+          <TableRow>
+            <TableRow>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={onAddTermClick}
+              >
+                Add term
+              </Button>
+            </TableRow>
+          </TableRow>
         </TableBody>
       </Table>
     </TableContainer>

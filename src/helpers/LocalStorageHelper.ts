@@ -45,7 +45,7 @@ export default class LocalStorageHelper {
     return this.cachedProfile.termLists;
   }
 
-  setActiveTermList(id: UUID) {
+  setActiveTermList(id: UUID | null) {
     this.cachedProfile.activeTermListId = id;
     this.saveData();
   }
