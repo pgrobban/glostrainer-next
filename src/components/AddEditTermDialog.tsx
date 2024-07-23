@@ -69,6 +69,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
       definition,
       type,
       conjugations,
+      notes,
     });
   };
 
