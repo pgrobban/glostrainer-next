@@ -226,8 +226,15 @@ const TermListPage: React.FC = () => {
         <TableContainer sx={{ mb: 3 }} component={Paper}>
           <Table>
             <TableHead>
-              <TableRow>
-                <TableCell align="center" colSpan={5}>
+              <TableRow sx={{ backgroundColor: "" }}>
+                <TableCell
+                  align="center"
+                  colSpan={5}
+                  sx={(theme) => ({
+                    fontWeight: 600,
+                    backgroundColor: theme.palette.background.default,
+                  })}
+                >
                   My term lists
                 </TableCell>
               </TableRow>

@@ -9,7 +9,7 @@ import {
   TextField,
 } from "@mui/material";
 import utilClassInstances from "../helpers/utilClassInstances";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { UUID } from "crypto";
 
@@ -66,7 +66,7 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
   };
 
   return (
-    <Dialog open={open} onClose={onRequestClose}>
+    <Dialog open={open} onClose={onRequestClose} disableRestoreFocus>
       <DialogTitle>
         {mode === "edit" ? "Edit term list" : "Create term list"}
       </DialogTitle>
@@ -84,6 +84,7 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
       </IconButton>
       <DialogContent>
         <TextField
+          inputRef={(input) => input && input.focus()}
           required
           label="Word list name"
           fullWidth
