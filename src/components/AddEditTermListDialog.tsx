@@ -1,4 +1,5 @@
 import { TermList } from "@/helpers/types";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
   Dialog,
@@ -8,10 +9,10 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
-import utilClassInstances from "../helpers/utilClassInstances";
-import { useEffect, useRef, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { UUID } from "crypto";
+import { FormikErrors, FormikProps, withFormik } from "formik";
+import utilClassInstances from "../helpers/utilClassInstances";
+import { useEffect, useState } from "react";
 
 const { localStorageHelperInstance } = utilClassInstances;
 const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
@@ -24,33 +25,118 @@ interface Props {
   editingTermListId: UUID | null;
 }
 
-const AddEditTermListDialog: React.FC<Props> = (props) => {
-  const { open, mode, onRequestClose, onSave, editingTermListId } = props;
+interface FormValues {
+  name: string;
+}
 
-  const [name, setName] = useState(
-    mode === "add"
-      ? ""
-      : localStorageHelperInstance.getActiveTermList()?.name || ""
-  );
-  const [isFormValid, setIsFormValid] = useState(mode === "edit");
+const InnerForm = (props: Props & FormikProps<FormValues>) => {
+  const {
+    open,
+    mode,
+    editingTermListId,
+    onRequestClose,
+    touched,
+    errors,
+    isSubmitting,
+    handleChange,
+    handleSubmit,
+    setFieldTouched,
+    setFieldValue,
+    values,
+  } = props;
+
   useEffect(() => {
     if (open) {
-      setName(
+      setFieldValue(
+        "name",
         mode === "add" || !editingTermListId
           ? ""
-          : localStorageHelperInstance.getListById(editingTermListId)?.name ||
-              ""
+          : localStorageHelperInstance.getTermListById(editingTermListId)
+              ?.name || ""
       );
-      setIsFormValid(mode === "edit");
     }
   }, [mode, open, editingTermListId]);
 
-  useEffect(() => {
-    setIsFormValid(name.length >= MINIMUM_TERM_LIST_NAME_LENGTH);
-  }, [name]);
+  return (
+    <form onSubmit={handleSubmit}>
+      <Dialog open={open} onClose={onRequestClose} disableRestoreFocus>
+        <DialogTitle>
+          {mode === "edit" ? "Edit term list" : "Create term list"}
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={onRequestClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent>
+          <TextField
+            inputRef={(input) => input && input.focus()}
+            required
+            name="name"
+            label="Term list name"
+            fullWidth
+            value={values.name}
+            onChange={(evt) => {
+              setFieldTouched("name", false);
+              handleChange(evt);
+            }}
+            helperText={errors.name && touched.name && String(errors.name)}
+            error={isSubmitting && touched.name}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            onClick={() => handleSubmit()}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </form>
+  );
+};
 
-  const onClickSave = () => {
-    if (mode === "add") {
+const AddEditTermListDialogForm = withFormik<Props, FormValues>({
+  mapPropsToValues: ({ editingTermListId }) => {
+    let name = "";
+    if (editingTermListId) {
+      const resolvedTermList =
+        localStorageHelperInstance.getTermListById(editingTermListId);
+      if (resolvedTermList) {
+        name = resolvedTermList.name;
+      }
+    }
+    return {
+      name,
+    };
+  },
+  validate: (values: FormValues) => {
+    const errors: FormikErrors<FormValues> = {};
+    if (values.name.trim().length < MINIMUM_TERM_LIST_NAME_LENGTH) {
+      errors.name = `Please enter at least ${MINIMUM_TERM_LIST_NAME_LENGTH} characters.`;
+    }
+    return errors;
+  },
+
+  handleSubmit: (values, { props, ...actions }) => {
+    const { name } = values;
+    const { onSave, editingTermListId } = props;
+    const listWithName = localStorageHelperInstance.getTermListByName(name);
+    const validName = !listWithName || listWithName.id === editingTermListId; // allow overwriting the editing list with the same name as a UX "feature"
+    if (!validName) {
+      actions.setFieldError("name", "A list with this name already exists.");
+      return;
+    }
+    if (props.mode === "add") {
       const newTermList = localStorageHelperInstance.createNewTermList(name);
       onSave(newTermList);
     } else {
@@ -63,43 +149,8 @@ const AddEditTermListDialog: React.FC<Props> = (props) => {
       )!;
       onSave(newTermList);
     }
-  };
+    actions.setSubmitting(false);
+  },
+})(InnerForm);
 
-  return (
-    <Dialog open={open} onClose={onRequestClose} disableRestoreFocus>
-      <DialogTitle>
-        {mode === "edit" ? "Edit term list" : "Create term list"}
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={onRequestClose}
-        sx={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
-      <DialogContent>
-        <TextField
-          inputRef={(input) => input && input.focus()}
-          required
-          label="Word list name"
-          fullWidth
-          value={name}
-          onChange={(evt) => setName(evt.target.value)}
-          helperText={`Minimum ${MINIMUM_TERM_LIST_NAME_LENGTH} characters`}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button disabled={!isFormValid} onClick={onClickSave}>
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export default AddEditTermListDialog;
+export default AddEditTermListDialogForm;

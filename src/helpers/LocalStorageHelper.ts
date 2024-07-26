@@ -58,7 +58,7 @@ export default class LocalStorageHelper {
   }
 
   rename(id: UUID, newName: string) {
-    const list = this.getListById(id);
+    const list = this.getTermListById(id);
     if (!list) {
       return;
     }
@@ -67,8 +67,12 @@ export default class LocalStorageHelper {
     return list; // todo: better
   }
 
-  getListById(id: UUID) {
+  getTermListById(id: UUID) {
     return this.cachedProfile.termLists.find((list) => list.id === id);
+  }
+
+  getTermListByName(name: string) {
+    return this.cachedProfile.termLists.find((list) => list.name === name);
   }
 
   saveData() {

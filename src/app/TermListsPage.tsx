@@ -232,7 +232,7 @@ const TermListPage: React.FC = () => {
                   colSpan={5}
                   sx={(theme) => ({
                     fontWeight: 600,
-                    backgroundColor: theme.palette.background.default,
+                    backgroundColor: theme.palette.common.black,
                   })}
                 >
                   My term lists
@@ -274,7 +274,10 @@ const TermListPage: React.FC = () => {
       <AddEditTermListDialog
         open={addEditTermListDialogOpen}
         mode={editingTermListId ? "edit" : "add"}
-        onRequestClose={() => setAddEditTermListDialogOpen(false)}
+        onRequestClose={() => {
+          setAddEditTermListDialogOpen(false);
+          setEditingTermListId(null);
+        }}
         onSave={onTermListSaved}
         editingTermListId={editingTermListId}
       />
