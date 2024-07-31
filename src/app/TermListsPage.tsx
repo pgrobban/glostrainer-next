@@ -95,13 +95,14 @@ const TermListPage: React.FC = () => {
 
   const saveLocalData = (newTerms: Term[]) => {
     localStorageHelperInstance.updateActiveTermList(newTerms);
+    setCachedTermLists([...localStorageHelperInstance.getCachedTermLists()]);
   };
 
   const onTermListSaved = (newTermList: TermListType) => {
     if (editingTermListId) {
       setEditingTermListId(null);
     } else {
-      setExpandedTermLists([newTermList.id]);
+      setEditingTermListId(newTermList.id);
     }
     setAddEditTermListDialogOpen(false);
   };
@@ -117,8 +118,10 @@ const TermListPage: React.FC = () => {
 
   const handleOpenChange = (id: UUID, open: boolean) => {
     if (open) {
+      localStorageHelperInstance.setActiveTermList(id);
       setExpandedTermLists([id]);
     } else {
+      localStorageHelperInstance.setActiveTermList(null);
       setExpandedTermLists([]);
     }
   };
