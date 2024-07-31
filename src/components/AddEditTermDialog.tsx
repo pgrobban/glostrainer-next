@@ -99,7 +99,6 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
           },
         },
       }}
-      disableRestoreFocus
     >
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
@@ -132,12 +131,12 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
           </Typography>
 
           <TextField
-            inputRef={(input) => input && input.focus()}
             required
             label="Swedish"
             fullWidth
             value={swedish}
             onChange={(evt) => setSwedish(evt.target.value)}
+            autoFocus
           />
 
           <TextField

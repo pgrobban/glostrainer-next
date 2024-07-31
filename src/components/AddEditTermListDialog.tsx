@@ -59,7 +59,7 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Dialog open={open} onClose={onRequestClose} disableRestoreFocus>
+      <Dialog open={open} onClose={onRequestClose}>
         <DialogTitle>
           {mode === "edit" ? "Edit term list" : "Create term list"}
         </DialogTitle>

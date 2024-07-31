@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { UUID } from "crypto";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { DateTime } from "ts-luxon";
 import AddEditTermDialog from "../components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
@@ -33,8 +33,7 @@ const TermListPage: React.FC = () => {
   const [addEditTermListDialogOpen, setAddEditTermListDialogOpen] =
     useState(false);
   const [editingTerm, setEditingTerm] = useState<Term | null>(null);
-  const [terms, setTerms] = useState<Term[]>([]);
-  const [activeTermListId, setActiveTermListId] = useState<UUID | null>(null);
+  const [expandedTermLists, setExpandedTermLists] = useState<UUID[]>([]);
   const [editingTermListId, setEditingTermListId] = useState<UUID | null>(null);
   const [cachedTermLists, setCachedTermLists] = useState<TermListType[]>([]);
   const [termListToDeleteId, setTermListToDeleteId] = useState<UUID | null>(
@@ -43,12 +42,15 @@ const TermListPage: React.FC = () => {
   const [termListToDeleteName, setTermListToDeleteName] = useState("");
 
   useEffect(() => {
-    setActiveTermListId(localStorageHelperInstance.getActiveTermListId());
-    setTerms(localStorageHelperInstance.getActiveTermList()?.terms || []);
+    const activeTermListId = localStorageHelperInstance.getActiveTermListId();
+    if (activeTermListId) {
+      setExpandedTermLists([activeTermListId]);
+    }
     setCachedTermLists(localStorageHelperInstance.getCachedTermLists());
   }, []);
 
   const onSaveTerm = (termToSave: Term) => {
+    const terms = localStorageHelperInstance.getActiveTermList()?.terms || [];
     const newTerms = [...terms];
     if (editingTerm) {
       const termIndex = terms.findIndex(
@@ -57,10 +59,8 @@ const TermListPage: React.FC = () => {
           term.definition === editingTerm.definition
       );
       newTerms.splice(termIndex, 1, termToSave);
-      setTerms(newTerms);
     } else {
       newTerms.push(termToSave);
-      setTerms(newTerms);
     }
     saveLocalData(newTerms);
     setAddEditTermDialogOpen(false);
@@ -73,6 +73,7 @@ const TermListPage: React.FC = () => {
   };
 
   const deleteTerm = (termToDelete: Term) => {
+    const terms = localStorageHelperInstance.getActiveTermList()?.terms || [];
     const newTerms = [...terms];
     const termIndex = terms.findIndex(
       (term) =>
@@ -80,7 +81,6 @@ const TermListPage: React.FC = () => {
         term.definition === termToDelete.definition
     );
     newTerms.splice(termIndex, 1);
-    setTerms(newTerms);
     saveLocalData(newTerms);
   };
 
@@ -101,7 +101,7 @@ const TermListPage: React.FC = () => {
     if (editingTermListId) {
       setEditingTermListId(null);
     } else {
-      setActiveTermListId(newTermList.id);
+      setExpandedTermLists([newTermList.id]);
     }
     setAddEditTermListDialogOpen(false);
   };
@@ -110,12 +110,17 @@ const TermListPage: React.FC = () => {
     if (!termListToDeleteId) {
       return;
     }
-    if (termListToDeleteId === activeTermListId) {
-      setActiveTermListId(null);
-    }
     localStorageHelperInstance.deleteTermList(termListToDeleteId);
     setCachedTermLists(localStorageHelperInstance.getCachedTermLists());
     setTermListToDeleteId(null);
+  };
+
+  const handleOpenChange = (id: UUID, open: boolean) => {
+    if (open) {
+      setExpandedTermLists([id]);
+    } else {
+      setExpandedTermLists([]);
+    }
   };
 
   /*
@@ -125,95 +130,85 @@ const TermListPage: React.FC = () => {
   };
   */
 
-  const TermListRow = (props: { termList: TermListType }) => {
-    const { id, name, terms, updatedOn } = props.termList;
-    const [open, setOpen] = useState(activeTermListId === id);
+  const TermListRow = memo(
+    (props: {
+      termList: TermListType;
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+    }) => {
+      const { open, onOpenChange, termList } = props;
+      const { id, name, terms, updatedOn } = termList;
 
-    const onToggleOpen = () => {
-      if (open) {
-        setOpen(false);
-        setActiveTermListId(null);
-        localStorageHelperInstance.setActiveTermList(null);
-      } else {
-        setOpen(true);
-        setActiveTermListId(id);
-        localStorageHelperInstance.setActiveTermList(id);
-      }
-      setTerms(localStorageHelperInstance.getActiveTermList()?.terms || []);
-    };
-
-    return (
-      <>
-        <TableRow
-          sx={{ "& > *": { borderBottom: "unset" }, cursor: "pointer" }}
-          onClick={onToggleOpen}
-        >
-          <TableCell>
-            <IconButton
-              aria-label="expand row"
-              size="small"
-              onClick={() => {
-                const newOpen = !open;
-                setOpen(!open);
-                setActiveTermListId(newOpen ? id : null);
-              }}
-            >
-              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-          </TableCell>
-          <TableCell
-            component="th"
-            scope="row"
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditingTermListId(id);
-              setAddEditTermListDialogOpen(true);
-            }}
+      return (
+        <>
+          <TableRow
+            sx={{ "& > *": { borderBottom: "unset" }, cursor: "pointer" }}
+            onClick={() => onOpenChange(!open)}
           >
-            {name}
-          </TableCell>
-          <TableCell>{terms.length}</TableCell>
-          <TableCell>
-            {updatedOn
-              ? typeof updatedOn === "string"
-                ? DateTime.fromISO(updatedOn).toLocaleString(
-                    DateTime.DATETIME_SHORT
-                  )
-                : DateTime.fromJSDate(updatedOn).toLocaleString(
-                    DateTime.DATETIME_SHORT
-                  )
-              : ""}
-          </TableCell>
-          <TableCell>
-            <IconButton
-              color="secondary"
+            <TableCell>
+              <IconButton aria-label="expand row" size="small">
+                {props.open ? (
+                  <KeyboardArrowUpIcon />
+                ) : (
+                  <KeyboardArrowDownIcon />
+                )}
+              </IconButton>
+            </TableCell>
+            <TableCell
+              component="th"
+              scope="row"
               onClick={(e) => {
                 e.stopPropagation();
-                setTermListToDeleteId(id);
-                setTermListToDeleteName(name);
+                setEditingTermListId(id);
+                setAddEditTermListDialogOpen(true);
               }}
             >
-              <DeleteIcon />
-            </IconButton>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-              <Box sx={{ margin: 1 }}>
-                <TermList
-                  terms={terms}
-                  onAddTermClick={onAddTermClick}
-                  onEditTerm={editTerm}
-                  onDeleteTerm={deleteTerm}
-                />
-              </Box>
-            </Collapse>
-          </TableCell>
-        </TableRow>
-      </>
-    );
-  };
+              {name}
+            </TableCell>
+            <TableCell>{terms.length}</TableCell>
+            <TableCell>
+              {updatedOn
+                ? typeof updatedOn === "string"
+                  ? DateTime.fromISO(updatedOn).toLocaleString(
+                      DateTime.DATETIME_SHORT
+                    )
+                  : DateTime.fromJSDate(updatedOn).toLocaleString(
+                      DateTime.DATETIME_SHORT
+                    )
+                : ""}
+            </TableCell>
+            <TableCell>
+              <IconButton
+                color="secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTermListToDeleteId(id);
+                  setTermListToDeleteName(name);
+                }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+              <Collapse in={open} timeout="auto" unmountOnExit>
+                <Box sx={{ margin: 1 }}>
+                  <TermList
+                    terms={terms}
+                    onAddTermClick={onAddTermClick}
+                    onEditTerm={editTerm}
+                    onDeleteTerm={deleteTerm}
+                  />
+                </Box>
+              </Collapse>
+            </TableCell>
+          </TableRow>
+        </>
+      );
+    }
+  );
+  TermListRow.displayName = "TermListRow";
 
   return (
     <>
@@ -248,7 +243,12 @@ const TermListPage: React.FC = () => {
             </TableHead>
             <TableBody>
               {cachedTermLists.map((termList) => (
-                <TermListRow key={termList.id} termList={termList} />
+                <TermListRow
+                  key={`term-list-row-${termList.id}`}
+                  termList={termList}
+                  open={expandedTermLists.includes(termList.id)}
+                  onOpenChange={(open) => handleOpenChange(termList.id, open)}
+                />
               ))}
             </TableBody>
           </Table>

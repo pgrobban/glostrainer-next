@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { useMemo, useState } from "react";
@@ -49,6 +48,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:last-child td, &:last-child th": {
     border: 0,
   },
+  cursor: "pointer",
 }));
 
 const headCells = [
@@ -136,28 +136,32 @@ const TermList: React.FC<Props> = ({
         </TableHead>
         <TableBody>
           {sortedTerms.map((term, index) => (
-            <StyledTableRow key={index}>
+            <StyledTableRow
+              key={index}
+              onClick={(evt) => {
+                evt.bubbles = false;
+                onEditTerm(term);
+              }}
+            >
               <StyledTableCell>{term.swedish}</StyledTableCell>
               <StyledTableCell>{term.definition}</StyledTableCell>
               <StyledTableCell>{term.type}</StyledTableCell>
               <StyledTableCell>{term.notes}</StyledTableCell>
               <StyledTableCell padding="none">
-                <Box>
-                  <IconButton color="primary" onClick={() => onEditTerm(term)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => onDeleteTerm(term)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  color="secondary"
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                    onDeleteTerm(term);
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </StyledTableCell>
             </StyledTableRow>
           ))}
           <TableRow>
-            <TableRow>
+            <TableCell>
               <Button
                 variant="outlined"
                 color="primary"
@@ -166,7 +170,7 @@ const TermList: React.FC<Props> = ({
               >
                 Add term
               </Button>
-            </TableRow>
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
