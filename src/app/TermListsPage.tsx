@@ -1,15 +1,9 @@
 "use client";
 import AddEditTermListDialog from "@/components/AddEditTermListDialog";
-import TermList from "@/components/TermList";
-import DeleteIcon from "@mui/icons-material/Delete";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import {
   Box,
   Button,
-  Collapse,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -19,12 +13,12 @@ import {
   TableRow,
 } from "@mui/material";
 import { UUID } from "crypto";
-import { memo, useEffect, useRef, useState } from "react";
-import { DateTime } from "ts-luxon";
+import { useEffect, useState } from "react";
 import AddEditTermDialog from "../components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "../helpers/utilClassInstances";
 import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
+import TermListRow from "@/components/TermListRow";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -118,11 +112,11 @@ const TermListPage: React.FC = () => {
 
   const handleOpenChange = (id: UUID, open: boolean) => {
     if (open) {
-      localStorageHelperInstance.setActiveTermList(id);
       setExpandedTermLists([id]);
+      localStorageHelperInstance.setActiveTermList(id);
     } else {
-      localStorageHelperInstance.setActiveTermList(null);
       setExpandedTermLists([]);
+      localStorageHelperInstance.setActiveTermList(null);
     }
   };
 
@@ -132,86 +126,6 @@ const TermListPage: React.FC = () => {
     setActiveTermListId(null);
   };
   */
-
-  const TermListRow = memo(
-    (props: {
-      termList: TermListType;
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-    }) => {
-      const { open, onOpenChange, termList } = props;
-      const { id, name, terms, updatedOn } = termList;
-
-      return (
-        <>
-          <TableRow
-            sx={{ "& > *": { borderBottom: "unset" }, cursor: "pointer" }}
-            onClick={() => onOpenChange(!open)}
-          >
-            <TableCell>
-              <IconButton aria-label="expand row" size="small">
-                {props.open ? (
-                  <KeyboardArrowUpIcon />
-                ) : (
-                  <KeyboardArrowDownIcon />
-                )}
-              </IconButton>
-            </TableCell>
-            <TableCell
-              component="th"
-              scope="row"
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingTermListId(id);
-                setAddEditTermListDialogOpen(true);
-              }}
-            >
-              {name}
-            </TableCell>
-            <TableCell>{terms.length}</TableCell>
-            <TableCell>
-              {updatedOn
-                ? typeof updatedOn === "string"
-                  ? DateTime.fromISO(updatedOn).toLocaleString(
-                      DateTime.DATETIME_SHORT
-                    )
-                  : DateTime.fromJSDate(updatedOn).toLocaleString(
-                      DateTime.DATETIME_SHORT
-                    )
-                : ""}
-            </TableCell>
-            <TableCell>
-              <IconButton
-                color="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setTermListToDeleteId(id);
-                  setTermListToDeleteName(name);
-                }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-              <Collapse in={open} timeout="auto" unmountOnExit>
-                <Box sx={{ margin: 1 }}>
-                  <TermList
-                    terms={terms}
-                    onAddTermClick={onAddTermClick}
-                    onEditTerm={editTerm}
-                    onDeleteTerm={deleteTerm}
-                  />
-                </Box>
-              </Collapse>
-            </TableCell>
-          </TableRow>
-        </>
-      );
-    }
-  );
-  TermListRow.displayName = "TermListRow";
 
   return (
     <>
@@ -251,6 +165,17 @@ const TermListPage: React.FC = () => {
                   termList={termList}
                   open={expandedTermLists.includes(termList.id)}
                   onOpenChange={(open) => handleOpenChange(termList.id, open)}
+                  onOpenEdit={() => {
+                    setEditingTermListId(termList.id);
+                    setAddEditTermListDialogOpen(true);
+                  }}
+                  onOpenDelete={() => {
+                    setTermListToDeleteId(termList.id);
+                    setTermListToDeleteName(termList.name);
+                  }}
+                  onOpenAddTerm={onAddTermClick}
+                  onOpenEditTerm={editTerm}
+                  onOpenDeleteTerm={deleteTerm}
                 />
               ))}
             </TableBody>
