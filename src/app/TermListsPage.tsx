@@ -4,6 +4,9 @@ import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import {
   Box,
   Button,
+  IconButton,
+  Input,
+  InputAdornment,
   Paper,
   Table,
   TableBody,
@@ -19,6 +22,9 @@ import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "../helpers/utilClassInstances";
 import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
 import TermListRow from "@/components/TermListRow";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
+import { filterTerm } from "@/helpers/searchUtils";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -34,6 +40,7 @@ const TermListPage: React.FC = () => {
     null
   );
   const [termListToDeleteName, setTermListToDeleteName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const activeTermListId = localStorageHelperInstance.getActiveTermListId();
@@ -42,6 +49,20 @@ const TermListPage: React.FC = () => {
     }
     setCachedTermLists(localStorageHelperInstance.getCachedTermLists());
   }, []);
+
+  useEffect(() => {
+    if (searchTerm.length === 0) {
+      return;
+    }
+    const termLists = localStorageHelperInstance.getCachedTermLists();
+    const filteredTermLists = termLists.filter((termList) =>
+      termList.terms.some((term) => filterTerm(term, searchTerm))
+    );
+    const filteredTermListIds = filteredTermLists.map(
+      (termList) => termList.id
+    );
+    setExpandedTermLists(filteredTermListIds);
+  }, [searchTerm]);
 
   const onSaveTerm = (termToSave: Term) => {
     const terms = localStorageHelperInstance.getActiveTermList()?.terms || [];
@@ -62,6 +83,7 @@ const TermListPage: React.FC = () => {
   };
 
   const editTerm = (term: Term) => {
+    setSearchTerm("");
     setEditingTerm(term);
     setAddEditTermDialogOpen(true);
   };
@@ -79,6 +101,7 @@ const TermListPage: React.FC = () => {
   };
 
   const onAddTermClick = () => {
+    setSearchTerm("");
     setEditingTerm(null);
     setAddEditTermDialogOpen(true);
   };
@@ -97,6 +120,9 @@ const TermListPage: React.FC = () => {
       setEditingTermListId(null);
     } else {
       setEditingTermListId(newTermList.id);
+      setSearchTerm("");
+      localStorageHelperInstance.setActiveTermList(newTermList.id);
+      setExpandedTermLists([newTermList.id]);
     }
     setAddEditTermListDialogOpen(false);
   };
@@ -147,7 +173,31 @@ const TermListPage: React.FC = () => {
                     backgroundColor: theme.palette.common.black,
                   })}
                 >
-                  My term lists
+                  <Box display={"flex"} justifyContent={"space-between"}>
+                    <Box textAlign={"center"} width={"100%"}>
+                      My term lists
+                    </Box>
+                    <Input
+                      sx={{ width: "250px" }}
+                      placeholder="Search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      }
+                      endAdornment={
+                        searchTerm.length > 0 && (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => setSearchTerm("")}>
+                              <ClearIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }
+                    />
+                  </Box>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -176,6 +226,7 @@ const TermListPage: React.FC = () => {
                   onOpenAddTerm={onAddTermClick}
                   onOpenEditTerm={editTerm}
                   onOpenDeleteTerm={deleteTerm}
+                  searchTerm={searchTerm}
                 />
               ))}
             </TableBody>

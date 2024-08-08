@@ -26,6 +26,7 @@ interface Props {
   onEditTerm: (term: Term) => void;
   onDeleteTerm: (term: Term) => void;
   sx?: SxProps;
+  searchTerm: string;
 }
 
 type TermOrderable = "swedish" | "definition" | "type";
@@ -87,6 +88,7 @@ const TermList: React.FC<Props> = ({
   onAddTermClick,
   onEditTerm,
   onDeleteTerm,
+  searchTerm,
 }) => {
   const [orderBy, setOrderBy] = useState<TermOrderable | null>();
   const [order, setOrder] = useState<"asc" | "desc">("asc");
@@ -107,31 +109,44 @@ const TermList: React.FC<Props> = ({
     [order, orderBy, terms]
   );
 
+  const isEmpty = sortedTerms.length === 0;
   return (
     <TableContainer sx={sx} component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
-            {headCells.map((headCell) => (
-              <StyledTableCell key={headCell.id} sx={{ fontWeight: 600 }}>
-                <TableSortLabel
-                  active={orderBy === headCell.id}
-                  direction={orderBy === headCell.id ? order : "asc"}
-                  onClick={createSortHandler(headCell.id as TermOrderable)}
-                >
-                  {headCell.label}
-                  {orderBy === headCell.id ? (
-                    <Box component="span" sx={visuallyHidden}>
-                      {order === "desc"
-                        ? "sorted descending"
-                        : "sorted ascending"}
-                    </Box>
-                  ) : null}
-                </TableSortLabel>
-              </StyledTableCell>
-            ))}
-            <StyledTableCell sx={{ fontWeight: 600 }}>Notes</StyledTableCell>
-            <StyledTableCell width={100}>{/* actions */}</StyledTableCell>
+            {isEmpty && (
+              <TableCell colSpan={5}>
+                {searchTerm.length === 0
+                  ? "There are no terms in this list."
+                  : "No terms match the search filter."}
+              </TableCell>
+            )}
+            {!isEmpty &&
+              headCells.map((headCell) => (
+                <StyledTableCell key={headCell.id} sx={{ fontWeight: 600 }}>
+                  <TableSortLabel
+                    active={orderBy === headCell.id}
+                    direction={orderBy === headCell.id ? order : "asc"}
+                    onClick={createSortHandler(headCell.id as TermOrderable)}
+                  >
+                    {headCell.label}
+                    {orderBy === headCell.id ? (
+                      <Box component="span" sx={visuallyHidden}>
+                        {order === "desc"
+                          ? "sorted descending"
+                          : "sorted ascending"}
+                      </Box>
+                    ) : null}
+                  </TableSortLabel>
+                </StyledTableCell>
+              ))}
+            {!isEmpty && (
+              <StyledTableCell sx={{ fontWeight: 600 }}>Notes</StyledTableCell>
+            )}
+            {!isEmpty && (
+              <StyledTableCell width={100}>{/* actions */}</StyledTableCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>

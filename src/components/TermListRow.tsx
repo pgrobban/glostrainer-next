@@ -6,6 +6,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import type { Term, TermList as TermListType } from "../helpers/types";
 import { DateTime } from "ts-luxon";
 import { Box, Collapse, IconButton, TableCell, TableRow } from "@mui/material";
+import { filterTerm } from "@/helpers/searchUtils";
 
 const TermListRow = memo(
   (props: {
@@ -17,6 +18,7 @@ const TermListRow = memo(
     onOpenAddTerm: () => void;
     onOpenEditTerm: (term: Term) => void;
     onOpenDeleteTerm: (term: Term) => void;
+    searchTerm: string;
   }) => {
     const {
       termList,
@@ -27,9 +29,10 @@ const TermListRow = memo(
       onOpenAddTerm,
       onOpenEditTerm,
       onOpenDeleteTerm,
+      searchTerm,
     } = props;
     const { name, terms, updatedOn } = termList;
-
+    const filteredTerms = terms.filter((term) => filterTerm(term, searchTerm));
     return (
       <>
         <TableRow
@@ -47,7 +50,6 @@ const TermListRow = memo(
             onClick={(e) => {
               e.stopPropagation();
               onOpenEdit();
-              onOpenDelete();
             }}
           >
             {name}
@@ -81,7 +83,8 @@ const TermListRow = memo(
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
                 <TermList
-                  terms={terms}
+                  terms={filteredTerms}
+                  searchTerm={searchTerm}
                   onAddTermClick={onOpenAddTerm}
                   onEditTerm={onOpenEditTerm}
                   onDeleteTerm={onOpenDeleteTerm}
