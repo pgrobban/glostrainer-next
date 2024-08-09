@@ -1,6 +1,8 @@
 import utilClassInstances from "../helpers/utilClassInstances";
 import { Term } from "./types";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 const { localStorageHelperInstance } = utilClassInstances;
 
 const universalBOM = "\uFEFF"; // needed for Excel to parse files as UTF-8
@@ -72,4 +74,31 @@ export const exportXlsx = () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8",
   });
   exportBlob(blob, "lists.xlsx");
+};
+
+export const exportPdf = async () => {
+  const termLists = localStorageHelperInstance.getCachedTermLists();
+
+  const doc = new jsPDF();
+  termLists.forEach((termList, index) => {
+    if (index > 0) {
+      doc.addPage();
+    }
+    const xOffset =
+      doc.internal.pageSize.width / 2 -
+      // @ts-expect-error Property 'getFontSize' does not exist on type
+      (doc.getStringUnitWidth(termList.name) * doc.internal.getFontSize()) / 2;
+    doc.text(termList.name, xOffset, 10, { align: "center" });
+    autoTable(doc, {
+      head: [["Swedish", "Definition", "Word class", "Notes"]],
+      body: termList.terms.map((term) => [
+        term.swedish,
+        term.definition,
+        term.type,
+        term.notes || "",
+      ]),
+    });
+  });
+
+  doc.save("lists.pdf");
 };

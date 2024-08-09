@@ -29,18 +29,21 @@ const ManageDataPage: React.FC = () => {
         <Box sx={{ "& > *": { marginRight: 3 } }}>
           <Button
             variant="outlined"
+            onClick={importExportDataHelper.exportXlsx}
+          >
+            Export XLSX
+          </Button>
+          <Button variant="outlined" onClick={importExportDataHelper.exportPdf}>
+            Export PDF
+          </Button>
+          <Button
+            variant="outlined"
             onClick={importExportDataHelper.exportJson}
           >
             Export JSON
           </Button>
           <Button variant="outlined" onClick={importExportDataHelper.exportCsv}>
             Export CSV
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={importExportDataHelper.exportXlsx}
-          >
-            Export XLSX
           </Button>
         </Box>
 
