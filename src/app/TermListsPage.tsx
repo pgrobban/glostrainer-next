@@ -14,6 +14,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
@@ -117,14 +118,13 @@ const TermListPage: React.FC = () => {
 
   const onTermListSaved = (newTermList: TermListType) => {
     if (editingTermListId) {
-      setEditingTermListId(null);
     } else {
-      setEditingTermListId(newTermList.id);
       setSearchTerm("");
       localStorageHelperInstance.setActiveTermList(newTermList.id);
       setExpandedTermLists([newTermList.id]);
     }
     setAddEditTermListDialogOpen(false);
+    setTimeout(() => setEditingTermListId(null), 500);
   };
 
   const onTermListDeleted = () => {
@@ -145,13 +145,6 @@ const TermListPage: React.FC = () => {
       localStorageHelperInstance.setActiveTermList(null);
     }
   };
-
-  /*
-  const onClearDataClick = () => {
-    localStorageHelperInstance.clearData();
-    setActiveTermListId(null);
-  };
-  */
 
   return (
     <>
@@ -175,7 +168,7 @@ const TermListPage: React.FC = () => {
                 >
                   <Box display={"flex"} justifyContent={"space-between"}>
                     <Box textAlign={"center"} width={"100%"}>
-                      My term lists
+                      <Typography variant="h4">My term lists</Typography>
                     </Box>
                     <Input
                       sx={{ width: "250px" }}

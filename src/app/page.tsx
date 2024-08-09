@@ -17,10 +17,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SwedishFlag from "../../public/images/flag.svg";
 import { useState } from "react";
 import Image from "next/image";
-import WordsList from "./TermListsPage";
+import TermListsPage from "./TermListsPage";
+import ManageDataPage from "./ManageDataPage";
 
-const pages = ["Terms", "Quiz"] as const;
-const settings = ["Export -NOT WORKING-"];
+const pages = ["Terms", "Quiz", "Manage data"] as const;
+const settings: string[] = [];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -181,7 +182,8 @@ function ResponsiveAppBar() {
           </Toolbar>
         </Container>
       </AppBar>
-      {currentPage === "Terms" && <WordsList />}
+      {currentPage === "Terms" && <TermListsPage />}
+      {currentPage === "Manage data" && <ManageDataPage />}
     </>
   );
 }

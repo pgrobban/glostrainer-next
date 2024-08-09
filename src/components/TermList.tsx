@@ -117,9 +117,15 @@ const TermList: React.FC<Props> = ({
           <TableRow>
             {isEmpty && (
               <TableCell colSpan={5}>
-                {searchTerm.length === 0
-                  ? "There are no terms in this list."
-                  : "No terms match the search filter."}
+                {searchTerm.length === 0 ? (
+                  <>
+                    There are no terms in this list.
+                    <br />
+                    Start adding terms by clicking the button below.
+                  </>
+                ) : (
+                  "No terms match the search filter."
+                )}
               </TableCell>
             )}
             {!isEmpty &&
