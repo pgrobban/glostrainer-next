@@ -75,6 +75,11 @@ export default class LocalStorageHelper {
     return this.cachedProfile.termLists.find((list) => list.name === name);
   }
 
+  overwriteTermLists(termLists: TermList[]) {
+    this.cachedProfile.termLists = termLists;
+    this.saveData();
+  }
+
   saveData() {
     this.cachedProfile.lastSave = new Date();
     localStorage.setItem(

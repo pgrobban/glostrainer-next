@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
+  CommonDialogProps,
   Conjugation,
   Term,
   WordClasses,
@@ -28,15 +29,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import utilClassInstances from "../helpers/utilClassInstances";
 const { localStorageHelperInstance } = utilClassInstances;
 
-interface Props {
-  open: boolean;
+interface Props extends CommonDialogProps {
   editingTerm?: Term | null;
-  onRequestClose: () => void;
   onSave: (term: Term) => void;
 }
 
 const AddEditTermDialog: React.FC<Props> = (props) => {
-  const { open, editingTerm, onRequestClose, onSave } = props;
+  const { open, editingTerm, onClose, onSave } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
   const [type, setType] = useState<WordClassType | "">("");
@@ -88,7 +87,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
 
   return (
     <Dialog
-      onClose={onRequestClose}
+      onClose={onClose}
       open={open}
       fullScreen={fullScreen}
       sx={{
@@ -102,7 +101,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
     >
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
-          <IconButton onClick={onRequestClose}>
+          <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">

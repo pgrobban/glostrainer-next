@@ -1,5 +1,5 @@
 import utilClassInstances from "../helpers/utilClassInstances";
-import { Term } from "./types";
+import { ImportStrategy, Term, TermList } from "./types";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -101,4 +101,88 @@ export const exportPdf = async () => {
   });
 
   doc.save("lists.pdf");
+};
+
+export const tryGetTermListsFromFile = (inputFile: File) => {
+  return new Promise<TermList[]>(async (resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(inputFile, "utf-8");
+    fileReader.onloadend = () => {
+      const result = fileReader.result;
+      if (typeof result !== "string") {
+        return reject();
+      }
+
+      const parsed = JSON.parse(result);
+      // TODO: validate data
+      return resolve(parsed);
+    };
+  });
+};
+
+const mergeLists = (termListsFromImport: TermList[], overwrite: boolean) => {
+  const cachedLists = localStorageHelperInstance.getCachedTermLists();
+  const result = [...cachedLists];
+  termListsFromImport.forEach((termListFromImport) => {
+    const termListExists = cachedLists.some(
+      (list) => list.name === termListFromImport.name
+    ); // maybe better to check id but names should be unique as well
+    if (termListExists) {
+      const listInResult = result.find(
+        (list) => list.name === termListFromImport.name
+      );
+      if (!listInResult) {
+        return; // should not happen, only to appease TS
+      }
+      const mergedList = { ...listInResult };
+      mergedList.terms = [];
+      termListFromImport.terms.forEach((termFromImport) => {
+        const foundTermInCachedList = listInResult.terms.find(
+          (resultTerm) =>
+            resultTerm.swedish === termFromImport.swedish &&
+            resultTerm.definition === termFromImport.definition
+        );
+        if (foundTermInCachedList) {
+          mergedList.terms.push(
+            overwrite ? termFromImport : foundTermInCachedList
+          );
+        } else {
+          mergedList.terms.push(termFromImport);
+        }
+      });
+      mergedList.updatedOn = new Date();
+    } else {
+      result.push(termListFromImport);
+    }
+  });
+  return result;
+};
+
+export const importData = (
+  termListsFromImport: TermList[],
+  importStrategy: ImportStrategy
+): TermList[] => {
+  switch (importStrategy) {
+    case "merge_lists_with_overwrite": {
+      return mergeLists(termListsFromImport, true);
+    }
+    case "merge_lists_without_overwrite": {
+      return mergeLists(termListsFromImport, false);
+    }
+    case "only_add_new_lists": {
+      const cachedLists = localStorageHelperInstance.getCachedTermLists();
+      const result = [...cachedLists];
+      termListsFromImport.forEach((termListFromImport) => {
+        const termListExists = cachedLists.some(
+          (list) => list.name === termListFromImport.name
+        );
+        if (!termListExists) {
+          result.push(termListFromImport);
+        }
+      });
+      return result;
+    }
+    case "clear_and_import":
+      return termListsFromImport;
+  }
 };

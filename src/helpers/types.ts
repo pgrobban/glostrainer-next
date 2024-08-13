@@ -40,3 +40,14 @@ export interface Profile {
   activeTermListId: UUID | null;
   lastSave?: Date | null;
 }
+
+export interface CommonDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export type ImportStrategy =
+  | "merge_lists_without_overwrite"
+  | "merge_lists_with_overwrite"
+  | "only_add_new_lists"
+  | "clear_and_import";

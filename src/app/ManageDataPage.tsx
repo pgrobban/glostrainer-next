@@ -1,4 +1,5 @@
 import ConfirmDeleteLocalDataDialog from "@/components/ConfirmDeleteLocalDataDialog";
+import ImportDataDialog from "@/components/ImportDataDialog";
 import * as importExportDataHelper from "@/helpers/importExportDataHelper";
 import { Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
@@ -8,6 +9,7 @@ const ManageDataPage: React.FC = () => {
     confirmDeleteLocalDataDialogOpen,
     setConfirmDeleteLocalDataDialogOpen,
   ] = useState(false);
+  const [importDataDialogOpen, setImportDataDialogOpen] = useState(false);
 
   return (
     <>
@@ -52,7 +54,10 @@ const ManageDataPage: React.FC = () => {
         </Typography>
 
         <Box>
-          <Button disabled variant="outlined">
+          <Button
+            variant="outlined"
+            onClick={() => setImportDataDialogOpen(true)}
+          >
             Import JSON
           </Button>
         </Box>
@@ -75,6 +80,11 @@ const ManageDataPage: React.FC = () => {
       <ConfirmDeleteLocalDataDialog
         open={confirmDeleteLocalDataDialogOpen}
         onClose={() => setConfirmDeleteLocalDataDialogOpen(false)}
+      />
+
+      <ImportDataDialog
+        open={importDataDialogOpen}
+        onClose={() => setImportDataDialogOpen(false)}
       />
     </>
   );

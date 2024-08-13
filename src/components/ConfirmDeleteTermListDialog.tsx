@@ -1,3 +1,4 @@
+import { CommonDialogProps } from "@/helpers/types";
 import {
   Button,
   Dialog,
@@ -6,10 +7,8 @@ import {
   DialogTitle,
 } from "@mui/material";
 
-interface Props {
-  open: boolean;
+interface Props extends CommonDialogProps {
   termListName: string;
-  onClose: () => void;
   onConfirm: () => void;
 }
 

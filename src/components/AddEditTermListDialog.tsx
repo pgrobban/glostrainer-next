@@ -1,4 +1,4 @@
-import { TermList } from "@/helpers/types";
+import { CommonDialogProps, TermList } from "@/helpers/types";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
@@ -12,15 +12,13 @@ import {
 import { UUID } from "crypto";
 import { FormikErrors, FormikProps, withFormik } from "formik";
 import utilClassInstances from "../helpers/utilClassInstances";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const { localStorageHelperInstance } = utilClassInstances;
 const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
-interface Props {
-  open: boolean;
+interface Props extends CommonDialogProps {
   mode: "add" | "edit";
-  onRequestClose: () => void;
   onSave: (newTermList: TermList) => void;
   editingTermListId: UUID | null;
 }
@@ -34,7 +32,7 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
     open,
     mode,
     editingTermListId,
-    onRequestClose,
+    onClose,
     touched,
     errors,
     isSubmitting,
@@ -59,13 +57,13 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Dialog open={open} onClose={onRequestClose}>
+      <Dialog open={open} onClose={onClose}>
         <DialogTitle>
           {mode === "edit" ? "Edit term list" : "Create term list"}
         </DialogTitle>
         <IconButton
           aria-label="close"
-          onClick={onRequestClose}
+          onClick={onClose}
           sx={{
             position: "absolute",
             right: 8,

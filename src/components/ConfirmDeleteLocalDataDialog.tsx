@@ -7,14 +7,10 @@ import {
   DialogTitle,
 } from "@mui/material";
 import utilClassInstances from "../helpers/utilClassInstances";
+import { CommonDialogProps } from "@/helpers/types";
 const { localStorageHelperInstance } = utilClassInstances;
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
-
-const ConfirmDeleteLocalDataDialog = ({ open, onClose }: Props) => {
+const ConfirmDeleteLocalDataDialog = ({ open, onClose }: CommonDialogProps) => {
   const onConfirmDeleteLocalData = () => {
     localStorageHelperInstance.clearData();
     onClose();
