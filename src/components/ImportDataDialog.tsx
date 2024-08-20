@@ -84,7 +84,7 @@ const ImportDataDialog = ({ open, onClose }: CommonDialogProps) => {
                   label={
                     <Typography>
                       <Typography color="primary" fontWeight={500}>
-                        Merge term lists, don't overwrite terms
+                        Merge term lists, don&apos;t overwrite terms
                       </Typography>
                       <ul>
                         <li>New term lists will be imported.</li>
