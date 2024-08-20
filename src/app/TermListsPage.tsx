@@ -203,13 +203,15 @@ const TermListPage: React.FC = () => {
                       </Box>
                     </TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell>{/* expand button */}</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Items</TableCell>
-                    <TableCell>Last update</TableCell>
-                    <TableCell>{/* delete button */}</TableCell>
-                  </TableRow>
+                  {cachedTermLists.length > 0 && (
+                    <TableRow>
+                      <TableCell>{/* expand button */}</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Items</TableCell>
+                      <TableCell>Last update</TableCell>
+                      <TableCell>{/* delete button */}</TableCell>
+                    </TableRow>
+                  )}
                 </TableHead>
                 <TableBody>
                   {cachedTermLists.map((termList) => (
@@ -237,7 +239,9 @@ const TermListPage: React.FC = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
+            {cachedTermLists.length === 0 && (
+              <Typography>You haven&apos;t created any lists yet.</Typography>
+            )}
             <Button
               variant="contained"
               color="primary"

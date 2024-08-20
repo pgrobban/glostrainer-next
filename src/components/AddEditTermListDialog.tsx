@@ -15,7 +15,7 @@ import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect } from "react";
 
 const { localStorageHelperInstance } = utilClassInstances;
-const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
+export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
 interface Props extends CommonDialogProps {
   mode: "add" | "edit";
@@ -57,7 +57,11 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog
+        data-testid={"add-edit-term-list-dialog"}
+        open={open}
+        onClose={onClose}
+      >
         <DialogTitle>
           {mode === "edit" ? "Edit term list" : "Create term list"}
         </DialogTitle>
@@ -75,6 +79,7 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
         </IconButton>
         <DialogContent>
           <TextField
+            data-testid={"term-list-name"}
             inputRef={(input) => input && input.focus()}
             required
             name="name"
