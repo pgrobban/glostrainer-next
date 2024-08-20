@@ -54,7 +54,10 @@ function ResponsiveAppBar() {
       <AppBar position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Box sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}>
+            <Box
+              sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
+              role="banner"
+            >
               <Image src={SwedishFlag} alt="Robban's GlosTrainer" height={16} />
             </Box>
             <Typography
