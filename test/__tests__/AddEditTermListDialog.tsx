@@ -13,15 +13,7 @@ describe("AddEditTermListDialog", () => {
   });
 
   it("Should not render anything if the dialog is not open", async () => {
-    render(
-      <AddEditTermListDialog
-        mode="add"
-        editingTermListId={null}
-        open={false}
-        onSave={() => {}}
-        onClose={() => {}}
-      />
-    );
+    render(<AddEditTermListDialog mode="add" open={false} />);
     const addEditTermListDialogElement = screen.queryByTestId(
       "add-edit-term-list-dialog"
     );
@@ -33,13 +25,7 @@ describe("AddEditTermListDialog", () => {
     const saveMock = jest.fn();
 
     render(
-      <AddEditTermListDialog
-        open={true}
-        editingTermListId={null}
-        mode={"add"}
-        onSave={saveMock}
-        onClose={() => {}}
-      />
+      <AddEditTermListDialog open={true} mode={"add"} onSave={saveMock} />
     );
     const termListNameTextField = screen
       .getByTestId("term-list-name")
@@ -95,7 +81,6 @@ describe("AddEditTermListDialog", () => {
           editingTermListId={profileWithOneEmptyList.termLists[0].id}
           mode={"edit"}
           onSave={saveMock}
-          onClose={() => {}}
         />
       );
     });
@@ -145,7 +130,6 @@ describe("AddEditTermListDialog", () => {
         editingTermListId={null}
         mode={"add"}
         onSave={saveMock}
-        onClose={() => {}}
       />
     );
     await user.keyboard("My term list");

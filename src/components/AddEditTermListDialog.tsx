@@ -19,20 +19,22 @@ export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
 interface Props extends CommonDialogProps {
   mode: "add" | "edit";
-  onSave: (newTermList: TermList) => void;
-  editingTermListId: UUID | null;
+  onSave?: (newTermList: TermList) => void;
+  editingTermListId?: UUID | null;
 }
 
 interface FormValues {
   name: string;
 }
 
-const InnerForm = (props: Props & FormikProps<FormValues>) => {
+const InnerForm = ({
+  onClose = () => {},
+  ...props
+}: Props & FormikProps<FormValues>) => {
   const {
     open,
     mode,
     editingTermListId,
-    onClose,
     touched,
     errors,
     isSubmitting,

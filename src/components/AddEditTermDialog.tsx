@@ -31,11 +31,16 @@ const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props extends CommonDialogProps {
   editingTerm?: Term | null;
-  onSave: (term: Term) => void;
+  onSave?: (term: Term) => void;
 }
 
-const AddEditTermDialog: React.FC<Props> = (props) => {
-  const { open, editingTerm, onClose, onSave } = props;
+const AddEditTermDialog: React.FC<Props> = ({
+  editingTerm = null,
+  onClose = () => {},
+  onSave = () => {},
+  ...props
+}) => {
+  const { open } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
   const [type, setType] = useState<WordClassType | "">("");
