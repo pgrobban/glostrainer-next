@@ -3,11 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import AddEditTermListDialog from "../../src/components/AddEditTermListDialog";
 import { MINIMUM_TERM_LIST_NAME_LENGTH } from "@/components/AddEditTermListDialog";
-import "../mocks/LocalStorageMock";
-import LocalStorageHelper from "@/helpers/LocalStorageHelper";
 import profileWithOneEmptyList from "../data/profileWithOneEmptyList";
+import utilClassInstances from "../../src/helpers/utilClassInstances";
+const { localStorageHelperInstance } = utilClassInstances;
 
 describe("AddEditTermListDialog", () => {
+  beforeEach(() => {
+    localStorageHelperInstance.clearData();
+  });
+
   it("Should not render anything if the dialog is not open", async () => {
     render(
       <AddEditTermListDialog
@@ -45,6 +49,11 @@ describe("AddEditTermListDialog", () => {
     }
     expect(termListNameTextField).toHaveFocus();
 
+    const titleElement = screen.getByText("Create term list");
+    expect(titleElement).toBeVisible();
+    const nameHintElement = screen.getByText("Term list name");
+    expect(nameHintElement).toBeVisible();
+
     const saveElement = screen.getByText("Save");
     await user.click(saveElement);
     let warningElement = screen.getByText(
@@ -74,9 +83,8 @@ describe("AddEditTermListDialog", () => {
 
   it("Validates editing of an existing list", async () => {
     const user = userEvent.setup();
-    localStorage.setItem(
-      LocalStorageHelper.LOCAL_STORAGE_KEY,
-      JSON.stringify(profileWithOneEmptyList)
+    localStorageHelperInstance.overwriteTermLists(
+      profileWithOneEmptyList.termLists
     );
 
     const saveMock = jest.fn();
@@ -91,10 +99,63 @@ describe("AddEditTermListDialog", () => {
         />
       );
     });
+    const titleElement = screen.getByText("Edit term list");
+    expect(titleElement).toBeVisible();
+
     const termListNameTextField = screen
       .getByTestId("term-list-name")
       .querySelector("input");
+    if (!termListNameTextField) {
+      throw new Error("Term list name text field was not found");
+    }
 
     expect(termListNameTextField).toHaveFocus();
+    await user.keyboard("[Backspace>20/]");
+
+    const saveElement = screen.getByText("Save");
+    await user.click(saveElement);
+    const warningElement = screen.getByText(
+      `Please enter at least ${MINIMUM_TERM_LIST_NAME_LENGTH} characters.`
+    );
+    expect(warningElement).toBeVisible();
+    expect(saveMock).not.toHaveBeenCalled();
+
+    await user.click(termListNameTextField);
+    await user.keyboard("[Backspace]");
+    await user.keyboard("My edited term list");
+
+    await user.click(saveElement);
+    expect(warningElement).not.toBeVisible();
+    expect(saveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "My edited term list",
+      })
+    );
+  });
+
+  it("Should not be possible to create list with a name that already exists", async () => {
+    const user = userEvent.setup();
+    localStorageHelperInstance.overwriteTermLists(
+      profileWithOneEmptyList.termLists
+    );
+    const saveMock = jest.fn();
+    render(
+      <AddEditTermListDialog
+        open={true}
+        editingTermListId={null}
+        mode={"add"}
+        onSave={saveMock}
+        onClose={() => {}}
+      />
+    );
+    await user.keyboard("My term list");
+
+    const saveElement = screen.getByText("Save");
+    await user.click(saveElement);
+    const warningElement = screen.getByText(
+      `A list with this name already exists.`
+    );
+    expect(warningElement).toBeVisible();
+    expect(saveMock).not.toHaveBeenCalled();
   });
 });

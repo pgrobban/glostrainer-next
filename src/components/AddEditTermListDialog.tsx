@@ -40,6 +40,7 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
     handleSubmit,
     setFieldTouched,
     setFieldValue,
+    setSubmitting,
     values,
   } = props;
 
@@ -88,6 +89,7 @@ const InnerForm = (props: Props & FormikProps<FormValues>) => {
             value={values.name}
             onChange={(evt) => {
               setFieldTouched("name", false);
+              setSubmitting(false);
               handleChange(evt);
             }}
             helperText={errors.name && touched.name && String(errors.name)}

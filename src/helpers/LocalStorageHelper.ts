@@ -76,7 +76,7 @@ export default class LocalStorageHelper {
   }
 
   overwriteTermLists(termLists: TermList[]) {
-    this.cachedProfile.termLists = termLists;
+    this.cachedProfile.termLists = JSON.parse(JSON.stringify(termLists));
     this.saveData();
   }
 
@@ -90,7 +90,7 @@ export default class LocalStorageHelper {
 
   clearData() {
     localStorage.removeItem(LocalStorageHelper.LOCAL_STORAGE_KEY);
-    this.cachedProfile = { ...defaultProfile };
+    this.cachedProfile = JSON.parse(JSON.stringify(defaultProfile));
   }
 
   updateActiveTermList(newTerms: Term[]) {
