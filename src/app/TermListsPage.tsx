@@ -149,6 +149,8 @@ const TermListPage: React.FC = () => {
     }
   };
 
+  const activeTermListName =
+    localStorageHelperInstance.getActiveTermList()?.name;
   return (
     <>
       <Box
@@ -259,6 +261,7 @@ const TermListPage: React.FC = () => {
         editingTerm={editingTerm}
         onClose={() => setAddEditTermDialogOpen(false)}
         onSave={onSaveTerm}
+        addingToListName={activeTermListName}
       />
 
       <AddEditTermListDialog

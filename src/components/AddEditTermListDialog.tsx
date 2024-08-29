@@ -19,7 +19,7 @@ export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
 interface Props extends CommonDialogProps {
   mode: "add" | "edit";
-  onSave?: (newTermList: TermList) => void;
+  onSave: (newTermList: TermList) => void;
   editingTermListId?: UUID | null;
 }
 

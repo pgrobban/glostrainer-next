@@ -26,12 +26,11 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import utilClassInstances from "../helpers/utilClassInstances";
-const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props extends CommonDialogProps {
+  onSave: (term: Term) => void;
+  addingToListName?: string;
   editingTerm?: Term | null;
-  onSave?: (term: Term) => void;
 }
 
 const AddEditTermDialog: React.FC<Props> = ({
@@ -40,7 +39,7 @@ const AddEditTermDialog: React.FC<Props> = ({
   onSave = () => {},
   ...props
 }) => {
-  const { open } = props;
+  const { open, addingToListName } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
   const [type, setType] = useState<WordClassType | "">("");
@@ -103,6 +102,8 @@ const AddEditTermDialog: React.FC<Props> = ({
           },
         },
       }}
+      disableRestoreFocus
+      data-testid={"add-edit-term-dialog"}
     >
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
@@ -112,9 +113,7 @@ const AddEditTermDialog: React.FC<Props> = ({
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             {editingTerm
               ? "Edit term"
-              : `Add new term to list '${
-                  localStorageHelperInstance.getActiveTermList()?.name
-                }'`}
+              : `Add new term to list '${addingToListName}'`}
           </Typography>
           <Button
             type="submit"
@@ -141,6 +140,7 @@ const AddEditTermDialog: React.FC<Props> = ({
             value={swedish}
             onChange={(evt) => setSwedish(evt.target.value)}
             autoFocus
+            data-testid="term-swedish"
           />
 
           <TextField
@@ -155,7 +155,7 @@ const AddEditTermDialog: React.FC<Props> = ({
             <InputLabel id="word-class-select">Word class</InputLabel>
 
             <Select
-              id="word-class-select"
+              data-testid="term-word-class"
               label="Word class"
               value={type}
               onChange={(evt) =>
