@@ -1,6 +1,12 @@
 import AddEditTermDialog from "@/components/AddEditTermDialog";
 import "@testing-library/jest-dom";
-import { getByRole, render, screen } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  within,
+  getByRole,
+} from "@testing-library/react";
 import utilClassInstances from "../../src/helpers/utilClassInstances";
 import userEvent from "@testing-library/user-event";
 import { Term } from "@/helpers/types";
@@ -65,18 +71,16 @@ describe("AddEditTermDialog", () => {
     expect(saveElement.closest("button")).toBeDisabled();
     expect(mockSave).not.toHaveBeenCalled();
 
-    await user.click(
-      getByRole(screen.getByTestId("term-word-class"), "combobox")
-    );
+    const wordClassElement = await screen.getByLabelText("Word class");
+    user.click(wordClassElement);
+    user.click(screen.getByText("Noun"));
 
-    /*const nounElement = screen.getByText("Noun");
-    await user.click(nounElement);
     expect(saveElement.closest("button")).not.toBeDisabled();
     user.click(saveElement);
     expect(mockSave).toHaveBeenCalledWith<Term[]>({
       swedish: "My term list",
       definition: "My definition",
       type: "Noun",
-    }); */
+    });
   });
 });

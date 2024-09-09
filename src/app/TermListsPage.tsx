@@ -4,7 +4,6 @@ import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import {
   Box,
   Button,
-  CircularProgress,
   IconButton,
   Input,
   InputAdornment,
@@ -27,6 +26,7 @@ import TermListRow from "@/components/TermListRow";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { filterTerm } from "@/helpers/searchUtils";
+import WithLoading from "@/helpers/WithLoading";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -159,101 +159,92 @@ const TermListPage: React.FC = () => {
           m: { xs: "16px", md: "16px auto" },
         }}
       >
-        {isLoading && (
-          <Box textAlign={"center"}>
-            <CircularProgress />
-          </Box>
-        )}
-        {!isLoading && (
-          <>
-            <TableContainer sx={{ mb: 3 }} component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "" }}>
-                    <TableCell
-                      align="center"
-                      colSpan={5}
-                      sx={(theme) => ({
-                        fontWeight: 600,
-                        backgroundColor: theme.palette.common.black,
-                      })}
-                    >
-                      <Box display={"flex"} justifyContent={"space-between"}>
-                        <Box textAlign={"center"} width={"100%"}>
-                          <Typography variant="h4">My term lists</Typography>
-                        </Box>
-                        <Input
-                          sx={{ width: "250px" }}
-                          placeholder="Search"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <SearchIcon />
-                            </InputAdornment>
-                          }
-                          endAdornment={
-                            searchTerm.length > 0 && (
-                              <InputAdornment position="end">
-                                <IconButton onClick={() => setSearchTerm("")}>
-                                  <ClearIcon />
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }
-                        />
+        <WithLoading isLoading={isLoading}>
+          <TableContainer sx={{ mb: 3 }} component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "" }}>
+                  <TableCell
+                    align="center"
+                    colSpan={5}
+                    sx={(theme) => ({
+                      fontWeight: 600,
+                      backgroundColor: theme.palette.common.black,
+                    })}
+                  >
+                    <Box display={"flex"} justifyContent={"space-between"}>
+                      <Box textAlign={"center"} width={"100%"}>
+                        <Typography variant="h4">My term lists</Typography>
                       </Box>
-                    </TableCell>
+                      <Input
+                        sx={{ width: "250px" }}
+                        placeholder="Search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        }
+                        endAdornment={
+                          searchTerm.length > 0 && (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => setSearchTerm("")}>
+                                <ClearIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }
+                      />
+                    </Box>
+                  </TableCell>
+                </TableRow>
+                {cachedTermLists.length > 0 && (
+                  <TableRow>
+                    <TableCell>{/* expand button */}</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Items</TableCell>
+                    <TableCell>Last update</TableCell>
+                    <TableCell>{/* delete button */}</TableCell>
                   </TableRow>
-                  {cachedTermLists.length > 0 && (
-                    <TableRow>
-                      <TableCell>{/* expand button */}</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Items</TableCell>
-                      <TableCell>Last update</TableCell>
-                      <TableCell>{/* delete button */}</TableCell>
-                    </TableRow>
-                  )}
-                </TableHead>
-                <TableBody>
-                  {cachedTermLists.map((termList) => (
-                    <TermListRow
-                      key={`term-list-row-${termList.id}`}
-                      termList={termList}
-                      open={expandedTermLists.includes(termList.id)}
-                      onOpenChange={(open) =>
-                        handleOpenChange(termList.id, open)
-                      }
-                      onOpenEdit={() => {
-                        setEditingTermListId(termList.id);
-                        setAddEditTermListDialogOpen(true);
-                      }}
-                      onOpenDelete={() => {
-                        setTermListToDeleteId(termList.id);
-                        setTermListToDeleteName(termList.name);
-                      }}
-                      onOpenAddTerm={onAddTermClick}
-                      onOpenEditTerm={editTerm}
-                      onOpenDeleteTerm={deleteTerm}
-                      searchTerm={searchTerm}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {cachedTermLists.length === 0 && (
-              <Typography>You haven&apos;t created any lists yet.</Typography>
-            )}
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddToListIcon />}
-              onClick={onCreateTermListClick}
-            >
-              Create term list
-            </Button>
-          </>
-        )}
+                )}
+              </TableHead>
+              <TableBody>
+                {cachedTermLists.map((termList) => (
+                  <TermListRow
+                    key={`term-list-row-${termList.id}`}
+                    termList={termList}
+                    open={expandedTermLists.includes(termList.id)}
+                    onOpenChange={(open) => handleOpenChange(termList.id, open)}
+                    onOpenEdit={() => {
+                      setEditingTermListId(termList.id);
+                      setAddEditTermListDialogOpen(true);
+                    }}
+                    onOpenDelete={() => {
+                      setTermListToDeleteId(termList.id);
+                      setTermListToDeleteName(termList.name);
+                    }}
+                    onOpenAddTerm={onAddTermClick}
+                    onOpenEditTerm={editTerm}
+                    onOpenDeleteTerm={deleteTerm}
+                    searchTerm={searchTerm}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {cachedTermLists.length === 0 && (
+            <Typography>You haven&apos;t created any lists yet.</Typography>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddToListIcon />}
+            onClick={onCreateTermListClick}
+          >
+            Create term list
+          </Button>
+        </WithLoading>
       </Box>
 
       <AddEditTermDialog
