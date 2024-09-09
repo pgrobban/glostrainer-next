@@ -43,7 +43,7 @@ export interface Profile {
 
 export interface CommonDialogProps {
   open: boolean;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
 export type ImportStrategy =

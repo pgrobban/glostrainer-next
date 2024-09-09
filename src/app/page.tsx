@@ -18,9 +18,10 @@ import SwedishFlag from "../../public/images/flag.svg";
 import { useState } from "react";
 import Image from "next/image";
 import TermListsPage from "./TermListsPage";
+import QuizBuilderPage from "./QuizBuilderPage";
 import ManageDataPage from "./ManageDataPage";
 
-const pages = ["Terms", "Quiz", "Manage data"] as const;
+const pages = ["Terms", "Quiz builder", "Manage data"] as const;
 const settings: string[] = [];
 
 function ResponsiveAppBar() {
@@ -186,6 +187,7 @@ function ResponsiveAppBar() {
         </Container>
       </AppBar>
       {currentPage === "Terms" && <TermListsPage />}
+      {currentPage === "Quiz builder" && <QuizBuilderPage />}
       {currentPage === "Manage data" && <ManageDataPage />}
     </>
   );

@@ -1,10 +1,11 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import AddEditTermListDialog from "../../src/components/AddEditTermListDialog";
 import { MINIMUM_TERM_LIST_NAME_LENGTH } from "@/components/AddEditTermListDialog";
 import profileWithOneEmptyList from "../data/profileWithOneEmptyList";
 import utilClassInstances from "../../src/helpers/utilClassInstances";
+import { TermList } from "@/helpers/types";
 const { localStorageHelperInstance } = utilClassInstances;
 
 describe("AddEditTermListDialog", () => {
@@ -13,7 +14,14 @@ describe("AddEditTermListDialog", () => {
   });
 
   it("Should not render anything if the dialog is not open", async () => {
-    render(<AddEditTermListDialog mode="add" open={false} />);
+    render(
+      <AddEditTermListDialog
+        mode="add"
+        open={false}
+        onSave={() => {}}
+        onClose={() => {}}
+      />
+    );
     const addEditTermListDialogElement = screen.queryByTestId(
       "add-edit-term-list-dialog"
     );
@@ -25,7 +33,12 @@ describe("AddEditTermListDialog", () => {
     const saveMock = jest.fn();
 
     render(
-      <AddEditTermListDialog open={true} mode={"add"} onSave={saveMock} />
+      <AddEditTermListDialog
+        open={true}
+        mode={"add"}
+        onSave={saveMock}
+        onClose={() => {}}
+      />
     );
     const termListNameTextField = screen
       .getByTestId("term-list-name")
@@ -60,7 +73,7 @@ describe("AddEditTermListDialog", () => {
 
     await user.click(saveElement);
     expect(warningElement).not.toBeVisible();
-    expect(saveMock).toHaveBeenCalledWith(
+    expect(saveMock).toHaveBeenCalledWith<TermList[]>(
       expect.objectContaining({
         name: "My term list",
       })
@@ -81,6 +94,7 @@ describe("AddEditTermListDialog", () => {
           editingTermListId={profileWithOneEmptyList.termLists[0].id}
           mode={"edit"}
           onSave={saveMock}
+          onClose={() => {}}
         />
       );
     });
@@ -130,6 +144,7 @@ describe("AddEditTermListDialog", () => {
         editingTermListId={null}
         mode={"add"}
         onSave={saveMock}
+        onClose={() => {}}
       />
     );
     await user.keyboard("My term list");

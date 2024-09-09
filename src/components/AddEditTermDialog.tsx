@@ -13,6 +13,7 @@ import {
   FormControl,
   MenuItem,
   InputLabel,
+  NativeSelect,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -26,12 +27,11 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import utilClassInstances from "../helpers/utilClassInstances";
-const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props extends CommonDialogProps {
+  onSave: (term: Term) => void;
+  addingToListName?: string;
   editingTerm?: Term | null;
-  onSave?: (term: Term) => void;
 }
 
 const AddEditTermDialog: React.FC<Props> = ({
@@ -40,7 +40,7 @@ const AddEditTermDialog: React.FC<Props> = ({
   onSave = () => {},
   ...props
 }) => {
-  const { open } = props;
+  const { open, addingToListName } = props;
   const [swedish, setSwedish] = useState("");
   const [definition, setDefinition] = useState("");
   const [type, setType] = useState<WordClassType | "">("");
@@ -103,6 +103,8 @@ const AddEditTermDialog: React.FC<Props> = ({
           },
         },
       }}
+      disableRestoreFocus
+      data-testid={"add-edit-term-dialog"}
     >
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
@@ -112,9 +114,7 @@ const AddEditTermDialog: React.FC<Props> = ({
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
             {editingTerm
               ? "Edit term"
-              : `Add new term to list '${
-                  localStorageHelperInstance.getActiveTermList()?.name
-                }'`}
+              : `Add new term to list '${addingToListName}'`}
           </Typography>
           <Button
             type="submit"
@@ -141,6 +141,8 @@ const AddEditTermDialog: React.FC<Props> = ({
             value={swedish}
             onChange={(evt) => setSwedish(evt.target.value)}
             autoFocus
+            data-testid="term-swedish"
+            placeholder="Swedish"
           />
 
           <TextField
@@ -151,19 +153,50 @@ const AddEditTermDialog: React.FC<Props> = ({
             onChange={(evt) => setDefinition(evt.target.value)}
           />
 
-          <FormControl sx={{ mt: 1 }} required fullWidth>
-            <InputLabel id="word-class-select">Word class</InputLabel>
+          <FormControl
+            sx={{ mt: 1, display: ["inline-flex", "none"] }}
+            required
+            fullWidth
+          >
+            <InputLabel variant="standard" htmlFor="word-class-select-native">
+              Word class
+            </InputLabel>
+            <NativeSelect
+              inputProps={{
+                name: "word-class",
+                id: "word-class-select-native",
+              }}
+              defaultValue={""}
+              onChange={(evt) => setType(evt.target.value as WordClassType)}
+            >
+              <option value={""} disabled style={{ fontStyle: "italic" }}>
+                Select a word class
+              </option>
+              {WordClasses.map((wordClass) => (
+                <option key={wordClass} value={wordClass}>
+                  {wordClass}
+                </option>
+              ))}
+            </NativeSelect>
+          </FormControl>
+          <FormControl
+            sx={{ mt: 1, display: ["none", "inline-flex"] }}
+            required
+            fullWidth
+          >
+            <InputLabel id="word-class-select-label">Word class</InputLabel>
 
             <Select
-              id="word-class-select"
+              data-testid="term-word-class"
               label="Word class"
+              labelId="word-class-select-label"
               value={type}
               onChange={(evt) =>
                 setType(evt.target.value as WordClassType | "")
               }
             >
-              <MenuItem value="" disabled>
-                <em>Select a word class</em>
+              <MenuItem value="" disabled sx={{ fontStyle: "italic" }}>
+                Select a word class
               </MenuItem>
               {WordClasses.map((wordClass) => (
                 <MenuItem key={wordClass} value={wordClass}>
