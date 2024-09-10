@@ -8,6 +8,7 @@ const defaultProfile = {
   activeTermListId: null,
   termLists: [],
   lastSave: null,
+  quizLists: [],
 };
 
 export default class LocalStorageHelper {
@@ -42,7 +43,11 @@ export default class LocalStorageHelper {
   }
 
   getCachedTermLists() {
-    return this.cachedProfile.termLists;
+    return this.cachedProfile.termLists || [];
+  }
+
+  getCachedQuizLists() {
+    return this.cachedProfile.quizLists || [];
   }
 
   setActiveTermList(id: UUID | null) {

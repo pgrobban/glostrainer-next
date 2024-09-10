@@ -35,8 +35,20 @@ export interface TermList {
   updatedOn?: Date;
 }
 
+export type QuizMode = "definition_to_english" | "english_to_definition";
+
+export interface QuizList {
+  id: UUID;
+  termsWithQuizModes: (Term & { quizModes: QuizMode[] })[];
+  name: string;
+  order: "random" | "in_order";
+  createdOn: Date;
+  updatedOn?: Date;
+}
+
 export interface Profile {
   termLists: TermList[];
+  quizLists: QuizList[];
   activeTermListId: UUID | null;
   lastSave?: Date | null;
 }

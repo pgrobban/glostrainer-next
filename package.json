@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^6.0.1",
     "@mui/material": "^6.0.1",
+    "@mui/x-tree-view": "^7.16.0",
     "formik": "^2.4.6",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",

@@ -139,7 +139,7 @@ const TermListPage: React.FC = () => {
     setTermListToDeleteId(null);
   };
 
-  const handleOpenChange = (id: UUID, open: boolean) => {
+  const handleExpandedChange = (id: UUID, open: boolean) => {
     if (open) {
       setExpandedTermLists([id]);
       localStorageHelperInstance.setActiveTermList(id);
@@ -203,7 +203,7 @@ const TermListPage: React.FC = () => {
                   <TableRow>
                     <TableCell>{/* expand button */}</TableCell>
                     <TableCell>Name</TableCell>
-                    <TableCell>Items</TableCell>
+                    <TableCell>Terms</TableCell>
                     <TableCell>Last update</TableCell>
                     <TableCell>{/* delete button */}</TableCell>
                   </TableRow>
@@ -214,8 +214,10 @@ const TermListPage: React.FC = () => {
                   <TermListRow
                     key={`term-list-row-${termList.id}`}
                     termList={termList}
-                    open={expandedTermLists.includes(termList.id)}
-                    onOpenChange={(open) => handleOpenChange(termList.id, open)}
+                    expanded={expandedTermLists.includes(termList.id)}
+                    onExpandedChange={(open) =>
+                      handleExpandedChange(termList.id, open)
+                    }
                     onOpenEdit={() => {
                       setEditingTermListId(termList.id);
                       setAddEditTermListDialogOpen(true);
