@@ -15,7 +15,6 @@ import {
   InputLabel,
   NativeSelect,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   CommonDialogProps,
   Conjugation,
@@ -25,8 +24,7 @@ import {
 } from "../helpers/types";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { AddIcon, CloseIcon, DeleteIcon } from "@/helpers/icons";
 
 interface Props extends CommonDialogProps {
   onSave: (term: Term) => void;

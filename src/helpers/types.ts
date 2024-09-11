@@ -37,9 +37,14 @@ export interface TermList {
 
 export type QuizMode = "definition_to_english" | "english_to_definition";
 
+export interface TermWithQuizMode {
+  term: Term;
+  quizModes: QuizMode[];
+}
+
 export interface QuizList {
   id: UUID;
-  termsWithQuizModes: (Term & { quizModes: QuizMode[] })[];
+  termsWithQuizModes: TermWithQuizMode[];
   name: string;
   order: "random" | "in_order";
   createdOn: Date;

@@ -47,7 +47,12 @@ export default class LocalStorageHelper {
   }
 
   getCachedQuizLists() {
-    return this.cachedProfile.quizLists || [];
+    return (
+      this.cachedProfile.quizLists || [
+        { id: "123-456-789-901", name: "quiz1", termsWithQuizModes: [] },
+        { id: "223-456-789-901", name: "quiz2", termsWithQuizModes: [] },
+      ]
+    );
   }
 
   setActiveTermList(id: UUID | null) {

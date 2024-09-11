@@ -1,6 +1,5 @@
 "use client";
 import AddEditTermListDialog from "@/components/AddEditTermListDialog";
-import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import {
   Box,
   Button,
@@ -23,11 +22,10 @@ import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "@/helpers/utilClassInstances";
 import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
 import TermListRow from "@/components/TermListRow";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 import { filterTerm } from "@/helpers/searchUtils";
 import WithLoading from "@/helpers/WithLoading";
 import ResponsiveAppBar from "@/app/ResponsiveAppBar";
+import { AddToListIcon, ClearIcon, SearchIcon } from "@/helpers/icons";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -154,7 +152,7 @@ const TermListPage: React.FC = () => {
     localStorageHelperInstance.getActiveTermList()?.name;
   return (
     <>
-      <ResponsiveAppBar activePage={"terms"} />
+      <ResponsiveAppBar />
       <Box
         sx={{
           width: { xs: "100%", md: "900px" },

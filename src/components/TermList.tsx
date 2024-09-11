@@ -1,23 +1,21 @@
+import { AddIcon, DeleteIcon } from "@/helpers/icons";
+import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
 import { Term } from "@/helpers/types";
 import {
-  Table,
-  TableCell,
-  TableBody,
-  TableRow,
-  TableHead,
   Box,
+  Button,
   IconButton,
-  styled,
-  tableCellClasses,
-  TableContainer,
   Paper,
   SxProps,
-  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
-import { visuallyHidden } from "@mui/utils";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import { visuallyHidden } from "@mui/utils";
 import { useMemo, useState } from "react";
 
 interface Props {
@@ -30,27 +28,6 @@ interface Props {
 }
 
 type TermOrderable = "swedish" | "definition" | "type";
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-  cursor: "pointer",
-}));
 
 const headCells = [
   {
@@ -169,15 +146,16 @@ const TermList: React.FC<Props> = ({
               <StyledTableCell>{term.type}</StyledTableCell>
               <StyledTableCell>{term.notes}</StyledTableCell>
               <StyledTableCell padding="none">
-                <IconButton
+                <Button
                   color="secondary"
+                  variant="outlined"
                   onClick={(evt) => {
                     evt.stopPropagation();
                     onDeleteTerm(term);
                   }}
                 >
                   <DeleteIcon />
-                </IconButton>
+                </Button>
               </StyledTableCell>
             </StyledTableRow>
           ))}

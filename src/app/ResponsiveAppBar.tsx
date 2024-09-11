@@ -13,17 +13,17 @@ import {
   Tooltip,
   MenuItem,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import SwedishFlag from "../../public/images/flag.svg";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { MenuIcon } from "@/helpers/icons";
 
 const pages = ["Terms", "Quiz builder", "Manage data"] as const;
 const pagePaths = ["/terms", "/quiz-builder", "/manage-data"] as const;
 const settings: string[] = [];
 
-function ResponsiveAppBar() {
+const ResponsiveAppBar = () => {
   const currentPathName = usePathname();
   const router = useRouter();
 
@@ -189,5 +189,5 @@ function ResponsiveAppBar() {
       </AppBar>
     </>
   );
-}
+};
 export default ResponsiveAppBar;

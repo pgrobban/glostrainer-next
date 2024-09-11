@@ -14,7 +14,7 @@ const ManageDataPage: React.FC = () => {
 
   return (
     <>
-      <ResponsiveAppBar activePage={"manage-data"} />
+      <ResponsiveAppBar />
       <Box
         sx={{
           width: { xs: "100%", md: "900px" },

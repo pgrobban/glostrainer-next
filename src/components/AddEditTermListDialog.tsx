@@ -1,5 +1,4 @@
 import { CommonDialogProps, TermList } from "@/helpers/types";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   Button,
   Dialog,
@@ -13,6 +12,7 @@ import { UUID } from "crypto";
 import { FormikErrors, FormikProps, withFormik } from "formik";
 import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect } from "react";
+import { CloseIcon } from "@/helpers/icons";
 
 const { localStorageHelperInstance } = utilClassInstances;
 export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;

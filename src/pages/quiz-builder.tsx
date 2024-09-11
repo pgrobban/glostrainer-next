@@ -1,10 +1,13 @@
 import QuizListRow from "@/components/QuizListRow";
-import { QuizList as QuizListType } from "@/helpers/types";
+import { QuizList as QuizListType, Term } from "@/helpers/types";
 import utilClassInstances from "@/helpers/utilClassInstances";
 import WithLoading from "@/helpers/WithLoading";
 import {
   Box,
   Button,
+  IconButton,
+  Input,
+  InputAdornment,
   Paper,
   Table,
   TableBody,
@@ -17,10 +20,21 @@ import {
 import { useEffect, useState } from "react";
 import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import ResponsiveAppBar from "@/app/ResponsiveAppBar";
+import { ClearIcon, SearchIcon } from "@/helpers/icons";
+import { UUID } from "crypto";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
 const QuizBuilderPage: React.FC = () => {
+  const [addEditQuizListDialogOpen, setAddEditQuizListDialogOpen] =
+    useState(false);
+  const [editingQuizList, setEditingQuizList] = useState<Term | null>(null);
+  const [expandedQuizLists, setExpandedQuizLists] = useState<UUID[]>([]);
+  const [quizListToDeleteId, setQuizListToDeleteId] = useState<UUID | null>(
+    null
+  );
+  const [quizListToDeleteName, setQuizListToDeleteName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [cachedQuizLists, setCachedQuizLists] = useState<QuizListType[]>([]);
 
@@ -33,7 +47,7 @@ const QuizBuilderPage: React.FC = () => {
 
   return (
     <>
-      <ResponsiveAppBar activePage={"quiz-builder"} />
+      <ResponsiveAppBar />
       <Box
         sx={{
           width: { xs: "100%", md: "900px" },
@@ -57,12 +71,31 @@ const QuizBuilderPage: React.FC = () => {
                       <Box textAlign={"center"} width={"100%"}>
                         <Typography variant="h4">My quiz lists</Typography>
                       </Box>
+                      <Input
+                        sx={{ width: "250px" }}
+                        placeholder="Search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        }
+                        endAdornment={
+                          searchTerm.length > 0 && (
+                            <InputAdornment position="end">
+                              <IconButton onClick={() => setSearchTerm("")}>
+                                <ClearIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }
+                      />
                     </Box>
                   </TableCell>
                 </TableRow>
                 {cachedQuizLists.length > 0 && (
                   <TableRow>
-                    <TableCell>{/* expand button */}</TableCell>
                     <TableCell>Name</TableCell>
                     <TableCell>Terms</TableCell>
                     <TableCell>Items</TableCell>

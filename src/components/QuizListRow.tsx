@@ -1,6 +1,8 @@
 import { getLocalDateTime } from "@/helpers/dateUtils";
+import { DeleteIcon, PlayIcon } from "@/helpers/icons";
+import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
 import { QuizList } from "@/helpers/types";
-import { TableCell, TableRow } from "@mui/material";
+import { Button } from "@mui/material";
 import { memo } from "react";
 
 interface Props {
@@ -16,12 +18,22 @@ const QuizListRow = memo(({ quizList }: Props) => {
     0
   );
   return (
-    <TableRow>
-      <TableCell>{name}</TableCell>
-      <TableCell>{termCount} terms</TableCell>
-      <TableCell>{questionCount} questions</TableCell>
-      <TableCell>{updatedOn && getLocalDateTime(updatedOn)}</TableCell>
-    </TableRow>
+    <StyledTableRow>
+      <StyledTableCell>{name}</StyledTableCell>
+      <StyledTableCell>{termCount}</StyledTableCell>
+      <StyledTableCell>{questionCount}</StyledTableCell>
+      <StyledTableCell>
+        {updatedOn && getLocalDateTime(updatedOn)}
+      </StyledTableCell>
+      <StyledTableCell align="right">
+        <Button sx={{ mr: 2 }} color="primary" variant="outlined">
+          <PlayIcon />
+        </Button>
+        <Button color="secondary" variant="outlined">
+          <DeleteIcon />
+        </Button>
+      </StyledTableCell>
+    </StyledTableRow>
   );
 });
 

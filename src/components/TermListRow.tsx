@@ -1,13 +1,10 @@
 import { memo } from "react";
 import TermList from "@/components/TermList";
-import DeleteIcon from "@mui/icons-material/Delete";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import type { Term, TermList as TermListType } from "../helpers/types";
-import { DateTime } from "ts-luxon";
 import { Box, Collapse, IconButton, TableCell, TableRow } from "@mui/material";
 import { filterTerm } from "@/helpers/searchUtils";
 import { getLocalDateTime } from "@/helpers/dateUtils";
+import { ArrowDownIcon, ArrowUpIcon, DeleteIcon } from "@/helpers/icons";
 
 interface Props {
   termList: TermListType;
@@ -43,7 +40,7 @@ const TermListRow = memo((props: Props) => {
       >
         <TableCell>
           <IconButton aria-label="expand row" size="small">
-            {expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {expanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
           </IconButton>
         </TableCell>
         <TableCell
