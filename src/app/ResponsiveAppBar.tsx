@@ -15,16 +15,18 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SwedishFlag from "../../public/images/flag.svg";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
-import TermListsPage from "./TermListsPage";
-import QuizBuilderPage from "./QuizBuilderPage";
-import ManageDataPage from "./ManageDataPage";
 
 const pages = ["Terms", "Quiz builder", "Manage data"] as const;
+const pagePaths = ["/terms", "/quiz-builder", "/manage-data"] as const;
 const settings: string[] = [];
 
 function ResponsiveAppBar() {
+  const currentPathName = usePathname();
+  const router = useRouter();
+
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -46,9 +48,6 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-
-  const [currentPage, setCurrentPage] =
-    useState<(typeof pages)[number]>("Terms");
 
   return (
     <>
@@ -136,17 +135,19 @@ function ResponsiveAppBar() {
               GlosTrainer
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map((page) => (
+              {pages.map((page, index) => (
                 <Button
                   key={page}
                   onClick={() => {
                     handleCloseNavMenu();
-                    setCurrentPage(page);
+                    router.push(pagePaths[index]);
                   }}
                   sx={{ my: 2, color: "white", display: "block" }}
                   style={{
                     textDecoration:
-                      currentPage === page ? "underline" : "unset",
+                      currentPathName === pagePaths[index]
+                        ? "underline"
+                        : "unset",
                   }}
                 >
                   {page}
@@ -186,9 +187,6 @@ function ResponsiveAppBar() {
           </Toolbar>
         </Container>
       </AppBar>
-      {currentPage === "Terms" && <TermListsPage />}
-      {currentPage === "Quiz builder" && <QuizBuilderPage />}
-      {currentPage === "Manage data" && <ManageDataPage />}
     </>
   );
 }

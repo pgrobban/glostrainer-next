@@ -1,3 +1,4 @@
+import ResponsiveAppBar from "@/app/ResponsiveAppBar";
 import ConfirmDeleteLocalDataDialog from "@/components/ConfirmDeleteLocalDataDialog";
 import ImportDataDialog from "@/components/ImportDataDialog";
 import * as importExportDataHelper from "@/helpers/importExportDataHelper";
@@ -13,6 +14,7 @@ const ManageDataPage: React.FC = () => {
 
   return (
     <>
+      <ResponsiveAppBar activePage={"manage-data"} />
       <Box
         sx={{
           width: { xs: "100%", md: "900px" },

@@ -18,15 +18,16 @@ import {
 } from "@mui/material";
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
-import AddEditTermDialog from "../components/AddEditTermDialog";
+import AddEditTermDialog from "@/components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
-import utilClassInstances from "../helpers/utilClassInstances";
+import utilClassInstances from "@/helpers/utilClassInstances";
 import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
 import TermListRow from "@/components/TermListRow";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import { filterTerm } from "@/helpers/searchUtils";
 import WithLoading from "@/helpers/WithLoading";
+import ResponsiveAppBar from "@/app/ResponsiveAppBar";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -153,6 +154,7 @@ const TermListPage: React.FC = () => {
     localStorageHelperInstance.getActiveTermList()?.name;
   return (
     <>
+      <ResponsiveAppBar activePage={"terms"} />
       <Box
         sx={{
           width: { xs: "100%", md: "900px" },
