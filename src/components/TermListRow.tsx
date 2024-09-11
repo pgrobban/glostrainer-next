@@ -1,7 +1,14 @@
 import { memo } from "react";
 import TermList from "@/components/TermList";
 import type { Term, TermList as TermListType } from "../helpers/types";
-import { Box, Collapse, IconButton, TableCell, TableRow } from "@mui/material";
+import {
+  Box,
+  Collapse,
+  Button,
+  TableCell,
+  TableRow,
+  IconButton,
+} from "@mui/material";
 import { filterTerm } from "@/helpers/searchUtils";
 import { getLocalDateTime } from "@/helpers/dateUtils";
 import { ArrowDownIcon, ArrowUpIcon, DeleteIcon } from "@/helpers/icons";
@@ -30,7 +37,7 @@ const TermListRow = memo((props: Props) => {
     onOpenDeleteTerm,
     searchTerm,
   } = props;
-  const { name, terms, updatedOn } = termList;
+  const { name, terms, createdOn, updatedOn } = termList;
   const filteredTerms = terms.filter((term) => filterTerm(term, searchTerm));
   return (
     <>
@@ -54,17 +61,22 @@ const TermListRow = memo((props: Props) => {
           {name}
         </TableCell>
         <TableCell>{terms.length}</TableCell>
-        <TableCell>{updatedOn && getLocalDateTime(updatedOn)}</TableCell>
         <TableCell>
-          <IconButton
+          {updatedOn
+            ? getLocalDateTime(updatedOn)
+            : getLocalDateTime(createdOn)}
+        </TableCell>
+        <TableCell>
+          <Button
             color="secondary"
+            variant="outlined"
             onClick={(e) => {
               e.stopPropagation();
               onOpenDelete();
             }}
           >
             <DeleteIcon />
-          </IconButton>
+          </Button>
         </TableCell>
       </TableRow>
       <TableRow>

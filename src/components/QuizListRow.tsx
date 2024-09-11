@@ -1,16 +1,17 @@
 import { getLocalDateTime } from "@/helpers/dateUtils";
 import { DeleteIcon, PlayIcon } from "@/helpers/icons";
 import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
-import { QuizList } from "@/helpers/types";
+import { Quiz } from "@/helpers/types";
 import { Button } from "@mui/material";
 import { memo } from "react";
 
 interface Props {
-  quizList: QuizList;
+  quiz: Quiz;
+  onOpenEditClick: () => void;
 }
 
-const QuizListRow = memo(({ quizList }: Props) => {
-  const { name, termsWithQuizModes, updatedOn } = quizList;
+const QuizListRow = memo(({ quiz, onOpenEditClick }: Props) => {
+  const { name, termsWithQuizModes, updatedOn, createdOn } = quiz;
 
   const termCount = termsWithQuizModes.length;
   const questionCount = termsWithQuizModes.reduce(
@@ -18,12 +19,12 @@ const QuizListRow = memo(({ quizList }: Props) => {
     0
   );
   return (
-    <StyledTableRow>
+    <StyledTableRow onClick={onOpenEditClick}>
       <StyledTableCell>{name}</StyledTableCell>
       <StyledTableCell>{termCount}</StyledTableCell>
       <StyledTableCell>{questionCount}</StyledTableCell>
       <StyledTableCell>
-        {updatedOn && getLocalDateTime(updatedOn)}
+        {updatedOn ? getLocalDateTime(updatedOn) : getLocalDateTime(createdOn)}
       </StyledTableCell>
       <StyledTableCell align="right">
         <Button sx={{ mr: 2 }} color="primary" variant="outlined">

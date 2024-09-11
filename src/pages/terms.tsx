@@ -259,7 +259,6 @@ const TermListPage: React.FC = () => {
 
       <AddEditTermListDialog
         open={addEditTermListDialogOpen}
-        mode={editingTermListId ? "edit" : "add"}
         onClose={() => {
           setAddEditTermListDialogOpen(false);
           setEditingTermListId(null);

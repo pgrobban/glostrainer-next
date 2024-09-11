@@ -42,7 +42,7 @@ export interface TermWithQuizMode {
   quizModes: QuizMode[];
 }
 
-export interface QuizList {
+export interface Quiz {
   id: UUID;
   termsWithQuizModes: TermWithQuizMode[];
   name: string;
@@ -53,7 +53,7 @@ export interface QuizList {
 
 export interface Profile {
   termLists: TermList[];
-  quizLists: QuizList[];
+  quizzes: Quiz[];
   activeTermListId: UUID | null;
   lastSave?: Date | null;
 }

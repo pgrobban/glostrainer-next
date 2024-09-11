@@ -8,7 +8,7 @@ const defaultProfile = {
   activeTermListId: null,
   termLists: [],
   lastSave: null,
-  quizLists: [],
+  quizzes: [],
 };
 
 export default class LocalStorageHelper {
@@ -46,13 +46,8 @@ export default class LocalStorageHelper {
     return this.cachedProfile.termLists || [];
   }
 
-  getCachedQuizLists() {
-    return (
-      this.cachedProfile.quizLists || [
-        { id: "123-456-789-901", name: "quiz1", termsWithQuizModes: [] },
-        { id: "223-456-789-901", name: "quiz2", termsWithQuizModes: [] },
-      ]
-    );
+  getCachedQuizzes() {
+    return this.cachedProfile.quizzes || [];
   }
 
   setActiveTermList(id: UUID | null) {
@@ -67,7 +62,7 @@ export default class LocalStorageHelper {
     this.saveData();
   }
 
-  rename(id: UUID, newName: string) {
+  renameTermList(id: UUID, newName: string) {
     const list = this.getTermListById(id);
     if (!list) {
       return;
@@ -81,8 +76,16 @@ export default class LocalStorageHelper {
     return this.cachedProfile.termLists.find((list) => list.id === id);
   }
 
+  getQuizById(id: UUID) {
+    return this.cachedProfile.quizzes.find((quiz) => quiz.id === id);
+  }
+
   getTermListByName(name: string) {
     return this.cachedProfile.termLists.find((list) => list.name === name);
+  }
+
+  getQuizByName(name: string) {
+    return this.cachedProfile.quizzes.find((list) => list.name === name);
   }
 
   overwriteTermLists(termLists: TermList[]) {

@@ -4,7 +4,6 @@ import { Term } from "@/helpers/types";
 import {
   Box,
   Button,
-  IconButton,
   Paper,
   SxProps,
   Table,

@@ -1,5 +1,6 @@
 import QuizListRow from "@/components/QuizListRow";
-import { QuizList as QuizListType, Term } from "@/helpers/types";
+import AddEditQuizDialog from "@/components/AddEditQuizDialog";
+import type { Quiz, Term } from "@/helpers/types";
 import utilClassInstances from "@/helpers/utilClassInstances";
 import WithLoading from "@/helpers/WithLoading";
 import {
@@ -28,22 +29,23 @@ const { localStorageHelperInstance } = utilClassInstances;
 const QuizBuilderPage: React.FC = () => {
   const [addEditQuizListDialogOpen, setAddEditQuizListDialogOpen] =
     useState(false);
-  const [editingQuizList, setEditingQuizList] = useState<Term | null>(null);
-  const [expandedQuizLists, setExpandedQuizLists] = useState<UUID[]>([]);
+  const [editingQuizListId, setEditingQuizListId] = useState<UUID | null>(null);
   const [quizListToDeleteId, setQuizListToDeleteId] = useState<UUID | null>(
     null
   );
   const [quizListToDeleteName, setQuizListToDeleteName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [cachedQuizLists, setCachedQuizLists] = useState<QuizListType[]>([]);
+  const [cachedQuizzes, setCachedQuizzes] = useState<Quiz[]>([]);
 
   useEffect(() => {
-    setCachedQuizLists(localStorageHelperInstance.getCachedQuizLists());
+    setCachedQuizzes(localStorageHelperInstance.getCachedQuizzes());
     setIsLoading(false);
   }, []);
 
-  const onCreateQuizListClick = () => {};
+  const onCreateQuizListClick = () => {
+    setAddEditQuizListDialogOpen(true);
+  };
 
   return (
     <>
@@ -94,7 +96,7 @@ const QuizBuilderPage: React.FC = () => {
                     </Box>
                   </TableCell>
                 </TableRow>
-                {cachedQuizLists.length > 0 && (
+                {cachedQuizzes.length > 0 && (
                   <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Terms</TableCell>
@@ -105,16 +107,20 @@ const QuizBuilderPage: React.FC = () => {
                 )}
               </TableHead>
               <TableBody>
-                {cachedQuizLists.map((quizList) => (
+                {cachedQuizzes.map((quiz) => (
                   <QuizListRow
-                    key={`quiz-list-row-${quizList.id}`}
-                    quizList={quizList}
+                    key={`quiz-list-row-${quiz.id}`}
+                    quiz={quiz}
+                    onOpenEditClick={() => {
+                      setEditingQuizListId(quiz.id);
+                      setAddEditQuizListDialogOpen(true);
+                    }}
                   />
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-          {cachedQuizLists.length === 0 && (
+          {cachedQuizzes.length === 0 && (
             <Typography>You haven&apos;t created any lists yet.</Typography>
           )}
           <Button
@@ -123,10 +129,20 @@ const QuizBuilderPage: React.FC = () => {
             startIcon={<AddToListIcon />}
             onClick={onCreateQuizListClick}
           >
-            Create quiz (coming soon :))
+            Create quiz
           </Button>
         </WithLoading>
       </Box>
+
+      <AddEditQuizDialog
+        open={addEditQuizListDialogOpen}
+        editingQuizId={editingQuizListId}
+        onSave={() => {}}
+        onClose={() => {
+          setEditingQuizListId(null);
+          setAddEditQuizListDialogOpen(false);
+        }}
+      />
     </>
   );
 };

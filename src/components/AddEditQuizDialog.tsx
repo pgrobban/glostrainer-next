@@ -1,5 +1,7 @@
-import { CommonDialogProps, TermList } from "@/helpers/types";
+import { CloseIcon } from "@/helpers/icons";
+import { CommonDialogProps, Quiz } from "@/helpers/types";
 import {
+  AppBar,
   Button,
   Dialog,
   DialogActions,
@@ -7,19 +9,22 @@ import {
   DialogTitle,
   IconButton,
   TextField,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { UUID } from "crypto";
 import { FormikErrors, FormikProps, withFormik } from "formik";
-import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect } from "react";
-import { CloseIcon } from "@/helpers/icons";
-
+import utilClassInstances from "../helpers/utilClassInstances";
+import { UUID } from "crypto";
 const { localStorageHelperInstance } = utilClassInstances;
-export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
+
+export const MINIMUM_QUIZ_NAME_LENGTH = 3;
 
 interface Props extends CommonDialogProps {
-  onSave: (newTermList: TermList) => void;
-  editingTermListId?: UUID | null;
+  editingQuizId?: UUID | null;
+  onSave: (newQuiz: Quiz) => void;
 }
 
 interface FormValues {
@@ -32,7 +37,7 @@ const InnerForm = ({
 }: Props & FormikProps<FormValues>) => {
   const {
     open,
-    editingTermListId,
+    editingQuizId,
     touched,
     errors,
     isSubmitting,
@@ -43,29 +48,28 @@ const InnerForm = ({
     setSubmitting,
     values,
   } = props;
-  const mode = editingTermListId ? "edit" : "add";
+  const mode = editingQuizId ? "edit" : "add";
 
   useEffect(() => {
     if (open) {
       setFieldValue(
         "name",
-        mode === "add" || !editingTermListId
+        mode === "add" || !editingQuizId
           ? ""
-          : localStorageHelperInstance.getTermListById(editingTermListId)
-              ?.name || ""
+          : localStorageHelperInstance.getQuizById(editingQuizId)?.name || ""
       );
     }
-  }, [mode, open, editingTermListId]);
+  }, [mode, open, editingQuizId]);
 
   return (
     <form onSubmit={handleSubmit}>
       <Dialog
-        data-testid={"add-edit-term-list-dialog"}
+        data-testid={"add-edit-quiz-dialog"}
         open={open}
         onClose={onClose}
       >
         <DialogTitle>
-          {mode === "edit" ? "Edit term list" : "Create term list"}
+          {mode === "edit" ? "Edit quiz" : "Create quiz"}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -81,11 +85,11 @@ const InnerForm = ({
         </IconButton>
         <DialogContent>
           <TextField
-            data-testid={"term-list-name"}
+            data-testid={"quiz-name"}
             inputRef={(input) => input && input.focus()}
             required
             name="name"
-            label="Term list name"
+            label="Quiz name"
             fullWidth
             value={values.name}
             onChange={(evt) => {
@@ -111,12 +115,12 @@ const InnerForm = ({
   );
 };
 
-const AddEditTermListDialogForm = withFormik<Props, FormValues>({
-  mapPropsToValues: ({ editingTermListId }) => {
+const AddEditQuizDialogForm = withFormik<Props, FormValues>({
+  mapPropsToValues: ({ editingQuizId }) => {
     let name = "";
-    if (editingTermListId) {
+    if (editingQuizId) {
       const resolvedTermList =
-        localStorageHelperInstance.getTermListById(editingTermListId);
+        localStorageHelperInstance.getTermListById(editingQuizId);
       if (resolvedTermList) {
         name = resolvedTermList.name;
       }
@@ -127,36 +131,24 @@ const AddEditTermListDialogForm = withFormik<Props, FormValues>({
   },
   validate: (values: FormValues) => {
     const errors: FormikErrors<FormValues> = {};
-    if (values.name.trim().length < MINIMUM_TERM_LIST_NAME_LENGTH) {
-      errors.name = `Please enter at least ${MINIMUM_TERM_LIST_NAME_LENGTH} characters.`;
+    if (values.name.trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
+      errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
     }
     return errors;
   },
 
   handleSubmit: (values, { props, ...actions }) => {
     const { name } = values;
-    const { onSave, editingTermListId } = props;
+    const { onSave, editingQuizId } = props;
     const listWithName = localStorageHelperInstance.getTermListByName(name);
-    const validName = !listWithName || listWithName.id === editingTermListId; // allow overwriting the editing list with the same name as a UX "feature"
+    const validName = !listWithName || listWithName.id === editingQuizId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
       actions.setFieldError("name", "A list with this name already exists.");
       return;
     }
-    if (props.mode === "add") {
-      const newTermList = localStorageHelperInstance.createNewTermList(name);
-      onSave(newTermList);
-    } else {
-      if (!editingTermListId) {
-        return;
-      }
-      const newTermList = localStorageHelperInstance.renameTermList(
-        editingTermListId,
-        name
-      )!;
-      onSave(newTermList);
-    }
+    // onSave
     actions.setSubmitting(false);
   },
 })(InnerForm);
 
-export default AddEditTermListDialogForm;
+export default AddEditQuizDialogForm;
