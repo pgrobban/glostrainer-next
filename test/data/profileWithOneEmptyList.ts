@@ -10,6 +10,7 @@ const userProfile: Profile = {
     },
   ],
   activeTermListId: null,
+  quizzes: [],
 };
 
 export default userProfile;

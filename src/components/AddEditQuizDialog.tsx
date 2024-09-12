@@ -2,12 +2,19 @@ import { CloseIcon } from "@/helpers/icons";
 import { CommonDialogProps, Quiz } from "@/helpers/types";
 import {
   AppBar,
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
   IconButton,
+  Radio,
+  RadioGroup,
   TextField,
   Toolbar,
   Typography,
@@ -41,6 +48,7 @@ const InnerForm = ({
     touched,
     errors,
     isSubmitting,
+    isValid,
     handleChange,
     handleSubmit,
     setFieldTouched,
@@ -49,6 +57,8 @@ const InnerForm = ({
     values,
   } = props;
   const mode = editingQuizId ? "edit" : "add";
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     if (open) {
@@ -61,16 +71,42 @@ const InnerForm = ({
     }
   }, [mode, open, editingQuizId]);
 
+  const onClickSave = () => {};
+
   return (
     <form onSubmit={handleSubmit}>
       <Dialog
         data-testid={"add-edit-quiz-dialog"}
         open={open}
         onClose={onClose}
+        sx={{
+          "& .MuiDialog-container": {
+            "& .MuiPaper-root": {
+              width: "100%",
+              maxWidth: theme.breakpoints.values.md,
+            },
+          },
+        }}
       >
-        <DialogTitle>
-          {mode === "edit" ? "Edit quiz" : "Create quiz"}
-        </DialogTitle>
+        <AppBar sx={{ position: "relative" }}>
+          <Toolbar>
+            <IconButton onClick={onClose}>
+              <CloseIcon />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              {mode === "edit" ? "Edit quiz" : "Create quiz"}
+            </Typography>
+            <Button
+              type="submit"
+              autoFocus
+              disabled={!isValid}
+              color="inherit"
+              onClick={onClickSave}
+            >
+              Save
+            </Button>
+          </Toolbar>
+        </AppBar>
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -84,22 +120,11 @@ const InnerForm = ({
           <CloseIcon />
         </IconButton>
         <DialogContent>
-          <TextField
-            data-testid={"quiz-name"}
-            inputRef={(input) => input && input.focus()}
-            required
-            name="name"
-            label="Quiz name"
-            fullWidth
-            value={values.name}
-            onChange={(evt) => {
-              setFieldTouched("name", false);
-              setSubmitting(false);
-              handleChange(evt);
-            }}
-            helperText={errors.name && touched.name && String(errors.name)}
-            error={isSubmitting && touched.name}
-          />
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}
+          ></Box>
         </DialogContent>
         <DialogActions>
           <Button

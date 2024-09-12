@@ -35,7 +35,7 @@ export interface TermList {
   updatedOn?: Date;
 }
 
-export type QuizMode = "definition_to_english" | "english_to_definition";
+export type QuizMode = "definition_to_swedish" | "swedish_to_definition";
 
 export interface TermWithQuizMode {
   term: Term;

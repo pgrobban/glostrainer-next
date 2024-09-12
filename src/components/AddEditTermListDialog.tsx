@@ -137,12 +137,13 @@ const AddEditTermListDialogForm = withFormik<Props, FormValues>({
     const { name } = values;
     const { onSave, editingTermListId } = props;
     const listWithName = localStorageHelperInstance.getTermListByName(name);
+    const mode = editingTermListId ? "edit" : "add";
     const validName = !listWithName || listWithName.id === editingTermListId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
       actions.setFieldError("name", "A list with this name already exists.");
       return;
     }
-    if (props.mode === "add") {
+    if (mode === "add") {
       const newTermList = localStorageHelperInstance.createNewTermList(name);
       onSave(newTermList);
     } else {
