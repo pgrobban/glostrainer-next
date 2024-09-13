@@ -1,16 +1,14 @@
 import { CloseIcon } from "@/helpers/icons";
-import { CommonDialogProps, Quiz } from "@/helpers/types";
+import { CommonDialogProps, Quiz, Term } from "@/helpers/types";
 import {
   AppBar,
   Box,
   Button,
+  Checkbox,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogTitle,
   FormControl,
   FormControlLabel,
-  FormGroup,
   FormLabel,
   IconButton,
   Radio,
@@ -21,10 +19,13 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { FormikErrors, FormikProps, withFormik } from "formik";
-import { useEffect } from "react";
-import utilClassInstances from "../helpers/utilClassInstances";
 import { UUID } from "crypto";
+import { FormikErrors, FormikProps, withFormik } from "formik";
+import { useEffect, useState } from "react";
+import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
+
+import utilClassInstances from "../helpers/utilClassInstances";
+import { TreeItem2 as TreeItem } from "@mui/x-tree-view";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
@@ -37,6 +38,10 @@ interface Props extends CommonDialogProps {
 interface FormValues {
   name: string;
 }
+
+type TermListObject = {
+  [termListId: UUID]: Term[];
+};
 
 const InnerForm = ({
   onClose = () => {},
@@ -72,10 +77,53 @@ const InnerForm = ({
   }, [mode, open, editingQuizId]);
 
   const onClickSave = () => {};
+  const cachedTermLists = localStorageHelperInstance.getCachedTermLists();
+  const termListsObject = cachedTermLists.reduce(
+    (acc, termList) => ({ ...acc, [termList.id]: termList.terms }),
+    {}
+  ) as TermListObject;
+  const defaultCheckedItems = cachedTermLists.reduce(
+    (acc, termList) => ({ ...acc, [termList.id]: [] }),
+    {}
+  ) as TermListObject;
+
+  const [checkedItems, setCheckedItems] =
+    useState<TermListObject>(defaultCheckedItems);
+  const getIsParentChecked = (termListId: UUID) =>
+    checkedItems[termListId].length === termListsObject[termListId].length;
+  const getIsParentIndeterminate = (termListId: UUID) =>
+    !getIsParentChecked(termListId) && checkedItems[termListId].length > 0;
+  const getIsChildChecked = (termListId: UUID, term: Term) =>
+    checkedItems[termListId].includes(term);
+  const handleParentChecked = (termListId: UUID, checked: boolean) => {
+    const checkedItemsClone = { ...checkedItems };
+    if (checked) {
+      checkedItemsClone[termListId] = termListsObject[termListId];
+    } else {
+      checkedItemsClone[termListId] = [];
+    }
+    setCheckedItems(checkedItemsClone);
+  };
+  const handleChildChecked = (
+    termListId: UUID,
+    checkedTerm: Term,
+    checked: boolean
+  ) => {
+    const checkedItemsClone = { ...checkedItems };
+    if (checked) {
+      checkedItemsClone[termListId].push(checkedTerm);
+    } else {
+      checkedItemsClone[termListId] = checkedItems[termListId].filter(
+        (term) => term !== checkedTerm
+      );
+    }
+    setCheckedItems(checkedItemsClone);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <Dialog
+        fullScreen={fullScreen}
         data-testid={"add-edit-quiz-dialog"}
         open={open}
         onClose={onClose}
@@ -87,6 +135,7 @@ const InnerForm = ({
             },
           },
         }}
+        disableRestoreFocus
       >
         <AppBar sx={{ position: "relative" }}>
           <Toolbar>
@@ -103,7 +152,15 @@ const InnerForm = ({
               color="inherit"
               onClick={onClickSave}
             >
-              Save
+              Save and close
+            </Button>
+            <Button
+              autoFocus
+              disabled={!isValid}
+              color="inherit"
+              onClick={onClickSave}
+            >
+              Save and play
             </Button>
           </Toolbar>
         </AppBar>
@@ -124,17 +181,122 @@ const InnerForm = ({
             display={"flex"}
             justifyContent={"space-between"}
             alignItems={"center"}
-          ></Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            onClick={() => handleSubmit()}
+            mb={2}
           >
-            Save
-          </Button>
-        </DialogActions>
+            <TextField
+              autoFocus
+              data-testid={"quiz-name"}
+              inputRef={(input) => input && input.focus()}
+              required
+              name="name"
+              label="Quiz name"
+              fullWidth
+              value={values.name}
+              onChange={(evt) => {
+                setFieldTouched("name", false);
+                setSubmitting(false);
+                handleChange(evt);
+              }}
+              helperText={errors.name && touched.name && String(errors.name)}
+              error={isSubmitting && touched.name}
+              sx={{ mr: 3 }}
+            />
+            <FormControl fullWidth>
+              <FormLabel id="order-group-label">Order</FormLabel>
+              <RadioGroup
+                aria-labelledby="order-group-label"
+                defaultValue="random"
+                name="order-group"
+                row
+              >
+                <FormControlLabel
+                  value="random"
+                  control={<Radio />}
+                  label="Random"
+                />
+                <FormControlLabel
+                  value="in_order"
+                  control={<Radio />}
+                  label="Use list order"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Box>
+
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}
+          >
+            <Box flexGrow={1} mr={2}>
+              <Typography>Select terms from your lists below</Typography>
+              <Box
+                height={400}
+                border={"1px solid gray"}
+                padding={1}
+                overflow={"auto scroll"}
+              >
+                <SimpleTreeView>
+                  {cachedTermLists.map((termList) => (
+                    <TreeItem
+                      itemId={termList.name}
+                      label={
+                        <FormControlLabel
+                          label={termList.name}
+                          control={
+                            <Checkbox
+                              checked={getIsParentChecked(termList.id)}
+                              indeterminate={getIsParentIndeterminate(
+                                termList.id
+                              )}
+                              onChange={(_, checked) =>
+                                handleParentChecked(termList.id, checked)
+                              }
+                            />
+                          }
+                        />
+                      }
+                    >
+                      {termList.terms.map((term) => (
+                        <TreeItem
+                          itemId={`${term.swedish}-${term.definition}`}
+                          label={
+                            <FormControlLabel
+                              label={
+                                <Box>
+                                  <Typography>{term.swedish}</Typography>
+                                </Box>
+                              }
+                              control={
+                                <Checkbox
+                                  checked={getIsChildChecked(termList.id, term)}
+                                  onChange={(_, checked) =>
+                                    handleChildChecked(
+                                      termList.id,
+                                      term,
+                                      checked
+                                    )
+                                  }
+                                />
+                              }
+                            />
+                          }
+                        />
+                      ))}
+                    </TreeItem>
+                  ))}
+                </SimpleTreeView>
+              </Box>
+            </Box>
+
+            <Box flexGrow={3}>
+              <Typography>Current terms in list</Typography>
+              <Box height={400} border={"1px solid gray"} padding={2}>
+                hello world
+              </Box>
+            </Box>
+          </Box>
+        </DialogContent>
       </Dialog>
     </form>
   );
