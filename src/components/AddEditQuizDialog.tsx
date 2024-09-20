@@ -26,6 +26,8 @@ import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 
 import utilClassInstances from "../helpers/utilClassInstances";
 import { TreeItem2 as TreeItem } from "@mui/x-tree-view";
+import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
+import QuizBuilderTable from "./QuizBuilderTable";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
@@ -39,7 +41,7 @@ interface FormValues {
   name: string;
 }
 
-type TermListObject = {
+export type TermListObject = {
   [termListId: UUID]: Term[];
 };
 
@@ -262,11 +264,8 @@ const InnerForm = ({
                           itemId={`${term.swedish}-${term.definition}`}
                           label={
                             <FormControlLabel
-                              label={
-                                <Box>
-                                  <Typography>{term.swedish}</Typography>
-                                </Box>
-                              }
+                              sx={{ lineHeight: 1 }}
+                              label={<SwedishDefinitionLabel term={term} />}
                               control={
                                 <Checkbox
                                   checked={getIsChildChecked(termList.id, term)}
@@ -291,8 +290,13 @@ const InnerForm = ({
 
             <Box flexGrow={3}>
               <Typography>Current terms in list</Typography>
-              <Box height={400} border={"1px solid gray"} padding={2}>
-                hello world
+              <Box height={400} overflow={"auto scroll"}>
+                <QuizBuilderTable
+                  termLists={checkedItems}
+                  onRemoveTerm={(termListId, term) =>
+                    handleChildChecked(termListId, term, false)
+                  }
+                />
               </Box>
             </Box>
           </Box>
