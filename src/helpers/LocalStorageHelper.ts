@@ -1,6 +1,13 @@
 "use client";
 import { AssertionError } from "assert";
-import { Profile, Term, TermList } from "./types";
+import {
+  Profile,
+  Quiz,
+  QuizOrder,
+  Term,
+  TermList,
+  TermListsWithQuizModes,
+} from "./types";
 import { v4 as uuid } from "uuid";
 import { UUID } from "crypto";
 
@@ -130,5 +137,21 @@ export default class LocalStorageHelper {
     this.cachedProfile.termLists.push(newTermList);
     this.setActiveTermList(newTermList.id);
     return newTermList;
+  }
+
+  createNewQuizList(
+    name: string,
+    termListsWithQuizModes: TermListsWithQuizModes,
+    order: QuizOrder
+  ) {
+    const newQuiz: Quiz = {
+      id: uuid() as UUID,
+      name,
+      createdOn: new Date(),
+      termListsWithQuizModes,
+      order,
+    };
+    this.cachedProfile.quizzes.push(newQuiz);
+    return newQuiz;
   }
 }

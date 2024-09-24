@@ -20,3 +20,7 @@ export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
   cursor: "pointer",
 }));
+
+export const StyledTableHeadRow = styled(TableRow)(({ theme }) => ({
+  backgroundColor: theme.palette.common.black,
+}));

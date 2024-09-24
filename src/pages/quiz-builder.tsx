@@ -23,6 +23,7 @@ import AddToListIcon from "@mui/icons-material/PlaylistAdd";
 import ResponsiveAppBar from "@/app/ResponsiveAppBar";
 import { ClearIcon, SearchIcon } from "@/helpers/icons";
 import { UUID } from "crypto";
+import { StyledTableHeadRow } from "@/helpers/styleUtils";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -60,7 +61,7 @@ const QuizBuilderPage: React.FC = () => {
           <TableContainer sx={{ mb: 3 }} component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "" }}>
+                <StyledTableHeadRow>
                   <TableCell
                     align="center"
                     colSpan={5}
@@ -95,7 +96,7 @@ const QuizBuilderPage: React.FC = () => {
                       />
                     </Box>
                   </TableCell>
-                </TableRow>
+                </StyledTableHeadRow>
                 {cachedQuizzes.length > 0 && (
                   <TableRow>
                     <TableCell>Name</TableCell>
@@ -137,7 +138,11 @@ const QuizBuilderPage: React.FC = () => {
       <AddEditQuizDialog
         open={addEditQuizListDialogOpen}
         editingQuizId={editingQuizListId}
-        onSave={() => {}}
+        onSave={() => {
+          localStorageHelperInstance.saveData();
+          setEditingQuizListId(null);
+          setAddEditQuizListDialogOpen(false);
+        }}
         onClose={() => {
           setEditingQuizListId(null);
           setAddEditQuizListDialogOpen(false);

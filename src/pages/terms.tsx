@@ -26,6 +26,7 @@ import { filterTerm } from "@/helpers/searchUtils";
 import WithLoading from "@/helpers/WithLoading";
 import ResponsiveAppBar from "@/app/ResponsiveAppBar";
 import { AddToListIcon, ClearIcon, SearchIcon } from "@/helpers/icons";
+import { StyledTableHeadRow } from "@/helpers/styleUtils";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -163,7 +164,7 @@ const TermListPage: React.FC = () => {
           <TableContainer sx={{ mb: 3 }} component={Paper}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "" }}>
+                <StyledTableHeadRow>
                   <TableCell
                     align="center"
                     colSpan={5}
@@ -198,7 +199,7 @@ const TermListPage: React.FC = () => {
                       />
                     </Box>
                   </TableCell>
-                </TableRow>
+                </StyledTableHeadRow>
                 {cachedTermLists.length > 0 && (
                   <TableRow>
                     <TableCell>{/* expand button */}</TableCell>
