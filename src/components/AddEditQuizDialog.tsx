@@ -25,7 +25,7 @@ import { useEffect, useState } from "react";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 
 import utilClassInstances from "../helpers/utilClassInstances";
-import { TreeItem2 as TreeItem } from "@mui/x-tree-view";
+import { TreeItem } from "@mui/x-tree-view";
 import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
 import QuizBuilderTable from "./QuizBuilderTable";
 const { localStorageHelperInstance } = utilClassInstances;
@@ -230,7 +230,7 @@ const InnerForm = ({
             justifyContent={"space-between"}
             alignItems={"center"}
           >
-            <Box flexGrow={1} mr={2}>
+            <Box flexBasis={"30%"} mr={3}>
               <Typography>Select terms from your lists below</Typography>
               <Box
                 height={400}
@@ -241,12 +241,14 @@ const InnerForm = ({
                 <SimpleTreeView>
                   {cachedTermLists.map((termList) => (
                     <TreeItem
+                      key={`-term-list-tree-item-${termList.name}`}
                       itemId={termList.name}
                       label={
                         <FormControlLabel
                           label={termList.name}
                           control={
                             <Checkbox
+                              onClick={(e) => e.stopPropagation()}
                               checked={getIsParentChecked(termList.id)}
                               indeterminate={getIsParentIndeterminate(
                                 termList.id
@@ -261,6 +263,7 @@ const InnerForm = ({
                     >
                       {termList.terms.map((term) => (
                         <TreeItem
+                          key={`-term-list-tree-item-${term.swedish}-${term.definition}`}
                           itemId={`${term.swedish}-${term.definition}`}
                           label={
                             <FormControlLabel
@@ -288,7 +291,7 @@ const InnerForm = ({
               </Box>
             </Box>
 
-            <Box flexGrow={3}>
+            <Box flexBasis={"70%"}>
               <Typography>Current terms in list</Typography>
               <Box height={400} overflow={"auto scroll"}>
                 <QuizBuilderTable
