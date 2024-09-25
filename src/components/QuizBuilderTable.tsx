@@ -1,5 +1,4 @@
-import { DeleteIcon } from "@/helpers/icons";
-import { StyledTableHeadRow, StyledTableRow } from "@/helpers/styleUtils";
+import { StyledTableHeadRow } from "@/helpers/styleUtils";
 import {
   QuizMode,
   Term,
@@ -9,7 +8,6 @@ import {
 import {
   Checkbox,
   FormControlLabel,
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -18,7 +16,7 @@ import {
 } from "@mui/material";
 import { UUID } from "crypto";
 import React, { useEffect } from "react";
-import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
+import QuizBuilderTableRow from "./QuizBuilderTableRow";
 
 interface Props {
   termLists: TermListObject;
@@ -203,56 +201,14 @@ const QuizBuilderTable: React.FC<Props> = ({
         {(Object.keys(termLists) as UUID[]).map((termListId) => (
           <React.Fragment key={`quiz-builder-term-list-${termListId}`}>
             {termLists[termListId].map((term) => (
-              <StyledTableRow
+              <QuizBuilderTableRow
                 key={`quiz-builder-term-${term.swedish}-${term.definition}`}
-              >
-                <TableCell>
-                  <SwedishDefinitionLabel term={term} />
-                </TableCell>
-                <TableCell align="center" padding="checkbox">
-                  <Checkbox
-                    checked={getHasQuizMode(
-                      termListId,
-                      term,
-                      "swedish_to_definition"
-                    )}
-                    onChange={(_, checked) =>
-                      toggleQuizModeChecked(
-                        "swedish_to_definition",
-                        checked,
-                        term
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell align="center" padding="checkbox">
-                  <Checkbox
-                    checked={getHasQuizMode(
-                      termListId,
-                      term,
-                      "definition_to_swedish"
-                    )}
-                    onChange={(_, checked) =>
-                      toggleQuizModeChecked(
-                        "definition_to_swedish",
-                        checked,
-                        term
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell align="center" padding="checkbox">
-                  -
-                </TableCell>
-                <TableCell align="center" padding="checkbox">
-                  <IconButton
-                    color="secondary"
-                    onClick={() => onRemoveTerm(termListId, term)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </StyledTableRow>
+                termListId={termListId}
+                term={term}
+                onRemoveTerm={onRemoveTerm}
+                getHasQuizMode={getHasQuizMode}
+                toggleQuizModeChecked={toggleQuizModeChecked}
+              />
             ))}
           </React.Fragment>
         ))}
