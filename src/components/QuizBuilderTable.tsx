@@ -138,27 +138,38 @@ const QuizBuilderTable: React.FC<Props> = ({
   };
 
   return (
-    <Table id="quiz-builder-table">
+    <Table id="quiz-builder-table" size="small" stickyHeader>
       <TableHead>
         <StyledTableHeadRow>
-          <TableCell padding="none" width={"30%"}>
+          <TableCell padding="none" width={"30%"} sx={{ border: 0 }}>
             &nbsp;
           </TableCell>
           <TableCell
             padding="none"
             colSpan={3}
             align="center"
-            sx={{ borderLeft: "1px solid gray", borderRight: "1px solid gray" }}
+            sx={{
+              borderLeft: "1px solid gray",
+              borderRight: "1px solid gray",
+              borderBottom: 0,
+            }}
           >
             Cards
           </TableCell>
-          <TableCell padding="none">&nbsp;</TableCell>
+          <TableCell padding="none" sx={{ border: 0 }}>
+            &nbsp;
+          </TableCell>
         </StyledTableHeadRow>
         <StyledTableHeadRow>
           <TableCell sx={{ fontSize: 12 }} width={"30%"}>
             Term
           </TableCell>
-          <TableCell align="center" width={150} padding="none">
+          <TableCell
+            align="center"
+            width={150}
+            padding="none"
+            sx={{ borderLeft: "1px solid gray" }}
+          >
             <FormControlLabel
               control={<Checkbox checked={isSweEngChecked} />}
               label={<Typography fontSize={12}>SWE-ENG</Typography>}
@@ -178,7 +189,11 @@ const QuizBuilderTable: React.FC<Props> = ({
               }
             />
           </TableCell>
-          <TableCell sx={{ fontSize: 12 }} width={150} align="center">
+          <TableCell
+            sx={{ fontSize: 12, borderRight: "1px solid gray" }}
+            width={150}
+            align="center"
+          >
             Custom
           </TableCell>
           <TableCell align="center" width={50}></TableCell>
@@ -191,7 +206,7 @@ const QuizBuilderTable: React.FC<Props> = ({
               <StyledTableRow
                 key={`quiz-builder-term-${term.swedish}-${term.definition}`}
               >
-                <TableCell padding="checkbox">
+                <TableCell>
                   <SwedishDefinitionLabel term={term} />
                 </TableCell>
                 <TableCell align="center" padding="checkbox">

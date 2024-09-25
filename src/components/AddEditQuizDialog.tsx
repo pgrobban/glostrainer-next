@@ -324,18 +324,20 @@ const InnerForm = ({
                   }
                 />
               </Box>
-              {errors.termListsWithQuizModes && (
-                <Typography color="orange" mt={1}>
-                  At least one term with at least one card needs to be selected
-                  in the quiz
-                </Typography>
-              )}
-              {!errors.termListsWithQuizModes && (
-                <Typography mt={1}>
-                  {addedTermsLength} terms, {addedTermsQuizModesLength} cards in
-                  quiz
-                </Typography>
-              )}
+              <Box mt={1}>
+                {errors.termListsWithQuizModes && (
+                  <Typography color="orange">
+                    At least one term with at least one card needs to be
+                    selected in the quiz
+                  </Typography>
+                )}
+                {!errors.termListsWithQuizModes && (
+                  <Typography>
+                    {addedTermsLength} terms, {addedTermsQuizModesLength} cards
+                    in quiz
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </Box>
         </DialogContent>
