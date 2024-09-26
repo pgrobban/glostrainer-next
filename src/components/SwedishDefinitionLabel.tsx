@@ -1,3 +1,4 @@
+import { getAbbreviatedTermType } from "@/helpers/termUtils";
 import { Term } from "@/helpers/types";
 import { Box, Typography } from "@mui/material";
 
@@ -8,7 +9,7 @@ interface Props {
 const SwedishDefinitionLabel: React.FC<Props> = ({ term }) => (
   <Box>
     <Typography component="span" sx={{ lineHeight: 1 }}>
-      {term.swedish}
+      {term.swedish} ({getAbbreviatedTermType(term.type)})
     </Typography>
     <br />
     <Typography component="span" sx={{ fontSize: "0.8em" }}>

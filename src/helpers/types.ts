@@ -35,29 +35,31 @@ export interface TermList {
   updatedOn?: Date;
 }
 
-export type QuizMode = "definition_to_swedish" | "swedish_to_definition";
+export type QuizCard = "definition_to_swedish" | "swedish_to_definition";
 export type QuizOrder = "random" | "in_order";
 
-export interface TermWithQuizModes {
+export interface TermWithCards {
   term: Term;
-  quizModes: QuizMode[];
+  cards: QuizCard[];
 }
 
 export interface Quiz {
   id: UUID;
-  termListsWithQuizModes: TermListsWithQuizModes;
+  termListsWithCards: TermListsWithCards;
   name: string;
   order: QuizOrder;
   createdOn: Date;
   updatedOn?: Date;
 }
 
+export type QuizSaveModel = Pick<Quiz, "name" | "termListsWithCards" | "order">;
+
 export type TermListObject = {
   [termListId: UUID]: Term[];
 };
 
-export type TermListsWithQuizModes = {
-  [termListId: UUID]: TermWithQuizModes[];
+export type TermListsWithCards = {
+  [termListId: UUID]: TermWithCards[];
 };
 
 export interface Profile {

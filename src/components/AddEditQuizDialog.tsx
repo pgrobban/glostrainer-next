@@ -2,10 +2,11 @@ import { CloseIcon } from "@/helpers/icons";
 import {
   CommonDialogProps,
   QuizOrder,
+  QuizSaveModel,
   Term,
   TermList,
   TermListObject,
-  TermListsWithQuizModes,
+  TermListsWithCards,
 } from "@/helpers/types";
 import {
   AppBar,
@@ -29,8 +30,8 @@ import {
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { UUID } from "crypto";
 import { FormikErrors, FormikProps, withFormik } from "formik";
-import { useEffect, useState } from "react";
-
+import { useState } from "react";
+import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import { TreeItem } from "@mui/x-tree-view";
 import utilClassInstances from "../helpers/utilClassInstances";
 import QuizBuilderTable from "./QuizBuilderTable";
@@ -41,15 +42,15 @@ export const MINIMUM_QUIZ_NAME_LENGTH = 3;
 
 interface Props extends CommonDialogProps {
   editingQuizId?: UUID | null;
-  onSave: () => void;
+  onSave: (quizSaveModel: QuizSaveModel) => void;
 }
 
 interface FormValues {
   name: string;
   termListsObject: TermListObject;
-  termListsWithQuizModes: TermListsWithQuizModes;
+  termListsWithCards: TermListsWithCards;
   defaultCheckedItems: TermListObject;
-  defaultTermListsWithQuizModes: TermListsWithQuizModes;
+  defaultTermListsWithCards: TermListsWithCards;
   cachedTermLists: TermList[];
   order: QuizOrder;
 }
@@ -74,19 +75,6 @@ const InnerForm = ({
   const mode = editingQuizId ? "edit" : "add";
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
-
-  useEffect(() => {
-    if (open) {
-      setFieldValue(
-        "name",
-        mode === "add" || !editingQuizId
-          ? ""
-          : localStorageHelperInstance.getQuizById(editingQuizId)?.name || ""
-      );
-    }
-  }, [mode, open, editingQuizId]);
-
-  const onClickSave = () => {};
 
   const [checkedItems, setCheckedItems] = useState<TermListObject>(
     values.defaultCheckedItems
@@ -124,26 +112,8 @@ const InnerForm = ({
     setCheckedItems(checkedItemsClone);
   };
 
-  const addedTermsLength = (
-    Object.keys(values.termListsWithQuizModes) as UUID[]
-  ).reduce(
-    (acc, termListId) => acc + values.termListsWithQuizModes[termListId].length,
-    0
-  );
-  const addedTermsQuizModesLength = (
-    Object.keys(values.termListsWithQuizModes) as UUID[]
-  ).reduce(
-    (acc, termListId) =>
-      acc +
-      values.termListsWithQuizModes[termListId].reduce(
-        (subAcc, termWithQuizMode) =>
-          subAcc + termWithQuizMode.quizModes.length,
-        0
-      ),
-    0
-  );
-
-  console.log("***", errors, touched);
+  const addedTermsCount = getQuizTermCount(values.termListsWithCards);
+  const addedCardsCount = getQuizCardCount(values.termListsWithCards);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -174,11 +144,11 @@ const InnerForm = ({
               type="submit"
               disabled={isSubmitting}
               color="inherit"
-              onClick={onClickSave}
+              onClick={() => handleSubmit()}
             >
               Save and close
             </Button>
-            <Button disabled={true} color="inherit" onClick={onClickSave}>
+            <Button disabled={true} color="inherit" onClick={() => {}}>
               Save and play
             </Button>
           </Toolbar>
@@ -205,7 +175,6 @@ const InnerForm = ({
             <TextField
               autoFocus
               data-testid={"quiz-name"}
-              inputRef={(input) => input && input.focus()}
               required
               name="name"
               label="Quiz name"
@@ -244,7 +213,7 @@ const InnerForm = ({
 
           <Box display={"flex"}>
             <Box flexBasis={"30%"} mr={1}>
-              <Typography>Select terms from your lists below</Typography>
+              <Typography>1. Select terms below</Typography>
               <Box
                 height={400}
                 border={"1px solid gray"}
@@ -304,7 +273,9 @@ const InnerForm = ({
             </Box>
 
             <Box flexBasis={"70%"}>
-              <Typography>Current terms in list</Typography>
+              <Typography>
+                2. Select cards to include in your quiz below
+              </Typography>
               <Box
                 height={400}
                 overflow={"auto scroll"}
@@ -315,26 +286,22 @@ const InnerForm = ({
                   onRemoveTerm={(termListId, term) =>
                     handleChildChecked(termListId, term, false)
                   }
-                  termListsWithQuizModes={values.termListsWithQuizModes}
-                  onQuizModesChange={(newTermListsWithQuizModes) =>
-                    setFieldValue(
-                      "termListsWithQuizModes",
-                      newTermListsWithQuizModes
-                    )
+                  termListsWithCards={values.termListsWithCards}
+                  onQuizCardsChange={(newTermListsWithCards) =>
+                    setFieldValue("termListsWithCards", newTermListsWithCards)
                   }
                 />
               </Box>
               <Box mt={1}>
-                {errors.termListsWithQuizModes && (
+                {errors.termListsWithCards && (
                   <Typography color="orange">
                     At least one term with at least one card needs to be
                     selected in the quiz
                   </Typography>
                 )}
-                {!errors.termListsWithQuizModes && (
+                {!errors.termListsWithCards && (
                   <Typography>
-                    {addedTermsLength} terms, {addedTermsQuizModesLength} cards
-                    in quiz
+                    {addedTermsCount} terms, {addedCardsCount} cards in quiz
                   </Typography>
                 )}
               </Box>
@@ -347,6 +314,7 @@ const InnerForm = ({
 };
 
 const AddEditQuizDialogForm = withFormik<Props, FormValues>({
+  enableReinitialize: true,
   mapPropsToValues: ({ editingQuizId }) => {
     let name = "";
     const cachedTermLists = localStorageHelperInstance.getCachedTermLists();
@@ -358,17 +326,18 @@ const AddEditQuizDialogForm = withFormik<Props, FormValues>({
       (acc, termList) => ({ ...acc, [termList.id]: [] }),
       {}
     ) as TermListObject;
-    const defaultTermListsWithQuizModes = cachedTermLists.reduce(
+    const defaultTermListsWithCards = cachedTermLists.reduce(
       (acc, termList) => ({ ...acc, [termList.id]: [] }),
       {}
-    ) as TermListsWithQuizModes;
+    ) as TermListsWithCards;
 
-    const termListsWithQuizModes = { ...defaultTermListsWithQuizModes };
+    let termListsWithCards = { ...defaultTermListsWithCards };
     if (editingQuizId) {
-      const resolvedTermList =
-        localStorageHelperInstance.getTermListById(editingQuizId);
-      if (resolvedTermList) {
-        name = resolvedTermList.name;
+      const resolvedQuiz =
+        localStorageHelperInstance.getQuizById(editingQuizId);
+      if (resolvedQuiz) {
+        name = resolvedQuiz.name;
+        termListsWithCards = resolvedQuiz.termListsWithCards;
       }
     }
 
@@ -378,52 +347,46 @@ const AddEditQuizDialogForm = withFormik<Props, FormValues>({
       name,
       termListsObject,
       defaultCheckedItems,
-      defaultTermListsWithQuizModes,
+      defaultTermListsWithCards,
       cachedTermLists: localStorageHelperInstance.getCachedTermLists(),
-      termListsWithQuizModes,
+      termListsWithCards,
       order: defaultQuizOrder,
     };
   },
   validate: (values: FormValues) => {
-    const { name, termListsWithQuizModes } = values;
+    const { name, termListsWithCards } = values;
     const errors: FormikErrors<Record<keyof FormValues, string>> = {};
     if (name.trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
       errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
     }
 
-    const hasAtLeastOneTermWithOneQuizModeEntered = (
-      Object.keys(termListsWithQuizModes) as UUID[]
+    const hasAtLeastOneTermWithOneCardEntered = (
+      Object.keys(termListsWithCards) as UUID[]
     ).some(
       (termListId) =>
-        termListsWithQuizModes[termListId].length > 0 &&
-        termListsWithQuizModes[termListId].some(
-          (termWithQuizModes) => termWithQuizModes.quizModes.length > 0
+        termListsWithCards[termListId].length > 0 &&
+        termListsWithCards[termListId].some(
+          (termWithCard) => termWithCard.cards.length > 0
         )
     );
-    if (!hasAtLeastOneTermWithOneQuizModeEntered) {
-      errors.termListsWithQuizModes =
+    if (!hasAtLeastOneTermWithOneCardEntered) {
+      errors.termListsWithCards =
         "At least one quiz mode needs to be selected for at least one item";
     }
     return errors;
   },
 
   handleSubmit: (values, { props, ...actions }) => {
-    const { name, termListsWithQuizModes, order } = values;
+    const { name, termListsWithCards, order } = values;
     const { onSave, editingQuizId } = props;
-    const listWithName = localStorageHelperInstance.getTermListByName(name);
+    const listWithName = localStorageHelperInstance.getQuizByName(name);
     const validName = !listWithName || listWithName.id === editingQuizId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
-      actions.setFieldError("name", "A list with this name already exists.");
+      actions.setFieldError("name", "A quiz with this name already exists.");
       return;
     }
 
-    localStorageHelperInstance.createNewQuizList(
-      name,
-      termListsWithQuizModes,
-      order
-    );
-
-    onSave();
+    onSave({ name, termListsWithCards, order });
     actions.setSubmitting(false);
   },
 })(InnerForm);

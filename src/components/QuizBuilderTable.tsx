@@ -1,9 +1,9 @@
 import { StyledTableHeadRow } from "@/helpers/styleUtils";
 import {
-  QuizMode,
+  QuizCard,
   Term,
   TermListObject,
-  TermListsWithQuizModes,
+  TermListsWithCards,
 } from "@/helpers/types";
 import {
   Checkbox,
@@ -21,118 +21,116 @@ import QuizBuilderTableRow from "./QuizBuilderTableRow";
 interface Props {
   termLists: TermListObject;
   onRemoveTerm: (termListId: UUID, term: Term) => void;
-  termListsWithQuizModes: TermListsWithQuizModes;
-  onQuizModesChange: (
-    newTermListsWithQuizModes: TermListsWithQuizModes
-  ) => void;
+  termListsWithCards: TermListsWithCards;
+  onQuizCardsChange: (newTermListsWithCards: TermListsWithCards) => void;
 }
 
 const QuizBuilderTable: React.FC<Props> = ({
   termLists,
   onRemoveTerm,
-  termListsWithQuizModes,
-  onQuizModesChange,
+  termListsWithCards,
+  onQuizCardsChange,
 }) => {
-  const getHasQuizMode = (termListId: UUID, term: Term, quizMode: QuizMode) =>
-    termListsWithQuizModes[termListId]
-      ?.find((termListsWithQuizModes) => termListsWithQuizModes.term === term)
-      ?.quizModes.includes(quizMode) ?? false;
+  const hasQuizCard = (termListId: UUID, term: Term, card: QuizCard) =>
+    termListsWithCards[termListId]
+      ?.find((termWithCards) => termWithCards.term === term)
+      ?.cards.includes(card) ?? false;
 
-  const isSweEngChecked = (Object.keys(termListsWithQuizModes) as UUID[]).every(
+  const isSweEngChecked = (Object.keys(termListsWithCards) as UUID[]).every(
     (termListId) =>
-      termListsWithQuizModes[termListId].every((termWithQUizModes) =>
-        termWithQUizModes.quizModes.includes("swedish_to_definition")
+      termListsWithCards[termListId].every((termWithCards) =>
+        termWithCards.cards.includes("swedish_to_definition")
       )
   );
-  const isEngSweChecked = (Object.keys(termListsWithQuizModes) as UUID[]).every(
+  const isEngSweChecked = (Object.keys(termListsWithCards) as UUID[]).every(
     (termListId) =>
-      termListsWithQuizModes[termListId].every((termWithQUizModes) =>
-        termWithQUizModes.quizModes.includes("definition_to_swedish")
+      termListsWithCards[termListId].every((termWithCards) =>
+        termWithCards.cards.includes("definition_to_swedish")
       )
   );
 
   useEffect(() => {
-    const newTermsWithQuizModes: TermListsWithQuizModes = {
-      ...termListsWithQuizModes,
+    const newTermListsWithCards: TermListsWithCards = {
+      ...termListsWithCards,
     };
     (Object.keys(termLists) as UUID[]).forEach((termListId) => {
-      if (!newTermsWithQuizModes[termListId]) {
-        newTermsWithQuizModes[termListId] = [];
+      if (!newTermListsWithCards[termListId]) {
+        newTermListsWithCards[termListId] = [];
       }
       termLists[termListId].forEach((term) => {
         // add case
-        const termAddedToQuizList = newTermsWithQuizModes[termListId].some(
-          (termWithQuizModes) => termWithQuizModes.term === term
+        const termAddedToQuizList = newTermListsWithCards[termListId].some(
+          (termWithCards) => termWithCards.term === term
         );
         if (!termAddedToQuizList) {
-          newTermsWithQuizModes[termListId].push({
+          newTermListsWithCards[termListId].push({
             term,
-            quizModes: [
+            cards: [
               isSweEngChecked && "swedish_to_definition",
               isEngSweChecked && "definition_to_swedish",
-            ].filter(Boolean) as QuizMode[],
+            ].filter(Boolean) as QuizCard[],
           });
         }
       });
-      newTermsWithQuizModes[termListId].forEach((termWithQUizMode) => {
+      newTermListsWithCards[termListId].forEach((termWithCards) => {
         // remove case
         const termRemovedFromQuizList = !termLists[termListId].some(
-          (termFromTermList) => termWithQUizMode.term === termFromTermList
+          (termFromTermList) => termWithCards.term === termFromTermList
         );
         if (termRemovedFromQuizList) {
-          newTermsWithQuizModes[termListId] = newTermsWithQuizModes[
+          newTermListsWithCards[termListId] = newTermListsWithCards[
             termListId
-          ].filter((t) => t !== termWithQUizMode);
+          ].filter((t) => t !== termWithCards);
         }
       });
     });
 
-    onQuizModesChange(newTermsWithQuizModes);
+    onQuizCardsChange(newTermListsWithCards);
   }, [termLists]);
 
-  const toggleQuizModeChecked = (
-    quizModeToToggle: QuizMode,
+  const toggleQuizCardChecked = (
+    cardToToggle: QuizCard,
     checked: boolean,
     termToToggle?: Term
   ) => {
-    const newTermsWithQuizModes: TermListsWithQuizModes = {
-      ...termListsWithQuizModes,
+    const newTermListsWithCards: TermListsWithCards = {
+      ...termListsWithCards,
     };
-    (Object.keys(newTermsWithQuizModes) as UUID[]).forEach((termListId) => {
-      newTermsWithQuizModes[termListId].forEach((termWithQuizModes) => {
-        if (termToToggle && termToToggle !== termWithQuizModes.term) {
+    (Object.keys(newTermListsWithCards) as UUID[]).forEach((termListId) => {
+      newTermListsWithCards[termListId].forEach((termWithCards) => {
+        if (termToToggle && termToToggle !== termWithCards.term) {
           return;
         }
 
         if (checked) {
-          termWithQuizModes.quizModes.push(quizModeToToggle);
+          termWithCards.cards.push(cardToToggle);
         } else {
-          termWithQuizModes.quizModes = termWithQuizModes.quizModes.filter(
-            (quizMode) => quizMode !== quizModeToToggle
+          termWithCards.cards = termWithCards.cards.filter(
+            (card) => card !== cardToToggle
           );
         }
       });
     });
-    onQuizModesChange(newTermsWithQuizModes);
+    onQuizCardsChange(newTermListsWithCards);
   };
 
-  const handleMultiTermQuizModeCheck = (
-    quizModeToToggle: QuizMode,
+  const handleMultiTermQuizCardCheck = (
+    cardToToggle: QuizCard,
     checked: boolean
   ) => {
-    const newTermsWithQuizModes = { ...termListsWithQuizModes };
-    (Object.keys(newTermsWithQuizModes) as UUID[]).forEach((termListId) => {
-      newTermsWithQuizModes[termListId].forEach((termWithQuizModes) => {
+    const newTermListsWithCards = { ...termListsWithCards };
+    (Object.keys(newTermListsWithCards) as UUID[]).forEach((termListId) => {
+      newTermListsWithCards[termListId].forEach((termWithCards) => {
         if (checked) {
-          termWithQuizModes.quizModes.push(quizModeToToggle);
+          termWithCards.cards.push(cardToToggle);
         } else {
-          termWithQuizModes.quizModes = termWithQuizModes.quizModes.filter(
-            (quizMode) => quizMode !== quizModeToToggle
+          termWithCards.cards = termWithCards.cards.filter(
+            (card) => card !== cardToToggle
           );
         }
       });
     });
-    onQuizModesChange(newTermsWithQuizModes);
+    onQuizCardsChange(newTermListsWithCards);
   };
 
   return (
@@ -142,13 +140,13 @@ const QuizBuilderTable: React.FC<Props> = ({
           <TableCell padding="none" width={"30%"} sx={{ border: 0 }}>
             &nbsp;
           </TableCell>
+          <TableCell sx={{ border: 0 }} />
           <TableCell
             padding="none"
             colSpan={3}
             align="center"
             sx={{
               borderLeft: "1px solid gray",
-              borderRight: "1px solid gray",
               borderBottom: 0,
             }}
           >
@@ -162,6 +160,7 @@ const QuizBuilderTable: React.FC<Props> = ({
           <TableCell sx={{ fontSize: 12 }} width={"30%"}>
             Term
           </TableCell>
+          <TableCell align="center" width={50}></TableCell>
           <TableCell
             align="center"
             width={150}
@@ -173,7 +172,7 @@ const QuizBuilderTable: React.FC<Props> = ({
               label={<Typography fontSize={12}>SWE-ENG</Typography>}
               labelPlacement="start"
               onChange={(_, checked) =>
-                handleMultiTermQuizModeCheck("swedish_to_definition", checked)
+                handleMultiTermQuizCardCheck("swedish_to_definition", checked)
               }
             />
           </TableCell>
@@ -183,7 +182,7 @@ const QuizBuilderTable: React.FC<Props> = ({
               label={<Typography fontSize={12}>ENG-SWE</Typography>}
               labelPlacement="start"
               onChange={(_, checked) =>
-                handleMultiTermQuizModeCheck("definition_to_swedish", checked)
+                handleMultiTermQuizCardCheck("definition_to_swedish", checked)
               }
             />
           </TableCell>
@@ -194,7 +193,6 @@ const QuizBuilderTable: React.FC<Props> = ({
           >
             Custom
           </TableCell>
-          <TableCell align="center" width={50}></TableCell>
         </StyledTableHeadRow>
       </TableHead>
       <TableBody>
@@ -206,8 +204,8 @@ const QuizBuilderTable: React.FC<Props> = ({
                 termListId={termListId}
                 term={term}
                 onRemoveTerm={onRemoveTerm}
-                getHasQuizMode={getHasQuizMode}
-                toggleQuizModeChecked={toggleQuizModeChecked}
+                hasQuizCard={hasQuizCard}
+                toggleQuizCardChecked={toggleQuizCardChecked}
               />
             ))}
           </React.Fragment>

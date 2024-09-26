@@ -24,17 +24,15 @@ import ResponsiveAppBar from "@/app/ResponsiveAppBar";
 import { ClearIcon, SearchIcon } from "@/helpers/icons";
 import { UUID } from "crypto";
 import { StyledTableHeadRow } from "@/helpers/styleUtils";
+import ConfirmDeleteQuizDialog from "@/components/ConfirmDeleteQuizDialog";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
 const QuizBuilderPage: React.FC = () => {
-  const [addEditQuizListDialogOpen, setAddEditQuizListDialogOpen] =
-    useState(false);
-  const [editingQuizListId, setEditingQuizListId] = useState<UUID | null>(null);
-  const [quizListToDeleteId, setQuizListToDeleteId] = useState<UUID | null>(
-    null
-  );
-  const [quizListToDeleteName, setQuizListToDeleteName] = useState("");
+  const [addEditQuizDialogOpen, setAddEditQuizDialogOpen] = useState(false);
+  const [editingQuizId, setEditingQuizId] = useState<UUID | null>(null);
+  const [quizToDeleteId, setQuizToDeleteId] = useState<UUID | null>(null);
+  const [quizToDeleteName, setQuizToDeleteName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [cachedQuizzes, setCachedQuizzes] = useState<Quiz[]>([]);
@@ -45,7 +43,7 @@ const QuizBuilderPage: React.FC = () => {
   }, []);
 
   const onCreateQuizListClick = () => {
-    setAddEditQuizListDialogOpen(true);
+    setAddEditQuizDialogOpen(true);
   };
 
   return (
@@ -101,7 +99,7 @@ const QuizBuilderPage: React.FC = () => {
                   <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Terms</TableCell>
-                    <TableCell>Items</TableCell>
+                    <TableCell>Cards</TableCell>
                     <TableCell>Last update</TableCell>
                     <TableCell>{/* play, edit, delete button */}</TableCell>
                   </TableRow>
@@ -112,9 +110,13 @@ const QuizBuilderPage: React.FC = () => {
                   <QuizListRow
                     key={`quiz-list-row-${quiz.id}`}
                     quiz={quiz}
-                    onOpenEditClick={() => {
-                      setEditingQuizListId(quiz.id);
-                      setAddEditQuizListDialogOpen(true);
+                    onOpenEdit={() => {
+                      setEditingQuizId(quiz.id);
+                      setAddEditQuizDialogOpen(true);
+                    }}
+                    onOpenDelete={() => {
+                      setQuizToDeleteId(quiz.id);
+                      setQuizToDeleteName(quiz.name);
                     }}
                   />
                 ))}
@@ -136,16 +138,32 @@ const QuizBuilderPage: React.FC = () => {
       </Box>
 
       <AddEditQuizDialog
-        open={addEditQuizListDialogOpen}
-        editingQuizId={editingQuizListId}
-        onSave={() => {
+        open={addEditQuizDialogOpen}
+        editingQuizId={editingQuizId}
+        onSave={(quizSaveModel) => {
+          if (editingQuizId) {
+            localStorageHelperInstance.updateQuiz(editingQuizId, quizSaveModel);
+          } else {
+            localStorageHelperInstance.createNewQuiz(quizSaveModel);
+          }
+
           localStorageHelperInstance.saveData();
-          setEditingQuizListId(null);
-          setAddEditQuizListDialogOpen(false);
+          setEditingQuizId(null);
+          setAddEditQuizDialogOpen(false);
         }}
         onClose={() => {
-          setEditingQuizListId(null);
-          setAddEditQuizListDialogOpen(false);
+          setEditingQuizId(null);
+          setAddEditQuizDialogOpen(false);
+        }}
+      />
+
+      <ConfirmDeleteQuizDialog
+        open={!!quizToDeleteId}
+        onClose={() => setQuizToDeleteId(null)}
+        quizToDeleteId={quizToDeleteId}
+        onDelete={() => {
+          setQuizToDeleteId(null);
+          setCachedQuizzes(localStorageHelperInstance.getCachedQuizzes());
         }}
       />
     </>

@@ -1,15 +1,7 @@
 "use client";
-import { AssertionError } from "assert";
-import {
-  Profile,
-  Quiz,
-  QuizOrder,
-  Term,
-  TermList,
-  TermListsWithQuizModes,
-} from "./types";
-import { v4 as uuid } from "uuid";
 import { UUID } from "crypto";
+import { v4 as uuid } from "uuid";
+import { Profile, Quiz, QuizSaveModel, Term, TermList } from "./types";
 
 const defaultProfile = {
   activeTermListId: null,
@@ -35,6 +27,9 @@ export default class LocalStorageHelper {
     );
     if (localData) {
       const storedProfile = JSON.parse(localData) as Profile;
+      if (!storedProfile.quizzes) {
+        storedProfile.quizzes = [];
+      }
       this.cachedProfile = storedProfile;
     }
   }
@@ -116,7 +111,7 @@ export default class LocalStorageHelper {
   updateActiveTermList(newTerms: Term[]) {
     const termList = this.getActiveTermList();
     if (!termList) {
-      throw new AssertionError();
+      throw new Error();
     }
     termList.terms = newTerms;
     termList.updatedOn = new Date();
@@ -139,19 +134,40 @@ export default class LocalStorageHelper {
     return newTermList;
   }
 
-  createNewQuizList(
-    name: string,
-    termListsWithQuizModes: TermListsWithQuizModes,
-    order: QuizOrder
-  ) {
+  createNewQuiz({ name, termListsWithCards, order }: QuizSaveModel) {
     const newQuiz: Quiz = {
       id: uuid() as UUID,
       name,
       createdOn: new Date(),
-      termListsWithQuizModes,
+      termListsWithCards,
       order,
     };
     this.cachedProfile.quizzes.push(newQuiz);
     return newQuiz;
+  }
+
+  updateQuiz(editingQuizId: UUID, quizSaveModel: QuizSaveModel) {
+    const { name, termListsWithCards, order } = quizSaveModel;
+    const quizIndex = this.cachedProfile.quizzes.findIndex(
+      (quiz) => quiz.id === editingQuizId
+    );
+    if (quizIndex === -1) {
+      throw new Error();
+    }
+    this.cachedProfile.quizzes[quizIndex] = {
+      id: editingQuizId,
+      name,
+      createdOn: this.cachedProfile.quizzes[quizIndex].createdOn,
+      updatedOn: new Date(),
+      termListsWithCards,
+      order,
+    };
+  }
+
+  deleteQuiz(id: UUID) {
+    this.cachedProfile.quizzes = this.cachedProfile.quizzes.filter(
+      (quiz) => quiz.id !== id
+    );
+    this.saveData();
   }
 }

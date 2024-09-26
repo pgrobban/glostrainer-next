@@ -98,11 +98,7 @@ const InnerForm = ({
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            onClick={() => handleSubmit()}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             Save
           </Button>
         </DialogActions>
