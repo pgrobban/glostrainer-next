@@ -32,7 +32,6 @@ const QuizBuilderPage: React.FC = () => {
   const [addEditQuizDialogOpen, setAddEditQuizDialogOpen] = useState(false);
   const [editingQuizId, setEditingQuizId] = useState<UUID | null>(null);
   const [quizToDeleteId, setQuizToDeleteId] = useState<UUID | null>(null);
-  const [quizToDeleteName, setQuizToDeleteName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [cachedQuizzes, setCachedQuizzes] = useState<Quiz[]>([]);

@@ -342,7 +342,6 @@ const AddEditQuizDialogForm = withFormik<Props, FormValues>({
     }
 
     const defaultQuizOrder: QuizOrder = "random";
-
     return {
       name,
       termListsObject,
