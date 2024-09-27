@@ -21,37 +21,35 @@ import QuizBuilderTableRow from "./QuizBuilderTableRow";
 interface Props {
   termLists: TermListObject;
   onRemoveTerm: (termListId: UUID, term: Term) => void;
-  termListsWithCards: TermListsWithCards;
-  onQuizCardsChange: (newTermListsWithCards: TermListsWithCards) => void;
+  value: TermListsWithCards;
+  onChange: (newTermListsWithCards: TermListsWithCards) => void;
 }
 
 const QuizBuilderTable: React.FC<Props> = ({
   termLists,
   onRemoveTerm,
-  termListsWithCards,
-  onQuizCardsChange,
+  value,
+  onChange,
 }) => {
   const hasQuizCard = (termListId: UUID, term: Term, card: QuizCard) =>
-    termListsWithCards[termListId]
+    value[termListId]
       ?.find((termWithCards) => termWithCards.term === term)
       ?.cards.includes(card) ?? false;
 
-  const isSweEngChecked = (Object.keys(termListsWithCards) as UUID[]).every(
-    (termListId) =>
-      termListsWithCards[termListId].every((termWithCards) =>
-        termWithCards.cards.includes("swedish_to_definition")
-      )
+  const isSweEngChecked = (Object.keys(value) as UUID[]).every((termListId) =>
+    value[termListId].every((termWithCards) =>
+      termWithCards.cards.includes("swedish_to_definition")
+    )
   );
-  const isEngSweChecked = (Object.keys(termListsWithCards) as UUID[]).every(
-    (termListId) =>
-      termListsWithCards[termListId].every((termWithCards) =>
-        termWithCards.cards.includes("definition_to_swedish")
-      )
+  const isEngSweChecked = (Object.keys(value) as UUID[]).every((termListId) =>
+    value[termListId].every((termWithCards) =>
+      termWithCards.cards.includes("definition_to_swedish")
+    )
   );
 
   useEffect(() => {
     const newTermListsWithCards: TermListsWithCards = {
-      ...termListsWithCards,
+      ...value,
     };
     (Object.keys(termLists) as UUID[]).forEach((termListId) => {
       if (!newTermListsWithCards[termListId]) {
@@ -85,8 +83,8 @@ const QuizBuilderTable: React.FC<Props> = ({
       });
     });
 
-    onQuizCardsChange(newTermListsWithCards);
-  }, [termLists]);
+    onChange(newTermListsWithCards);
+  }, [termLists, isSweEngChecked, isEngSweChecked, onChange, value]);
 
   const toggleQuizCardChecked = (
     cardToToggle: QuizCard,
@@ -94,7 +92,7 @@ const QuizBuilderTable: React.FC<Props> = ({
     termToToggle?: Term
   ) => {
     const newTermListsWithCards: TermListsWithCards = {
-      ...termListsWithCards,
+      ...value,
     };
     (Object.keys(newTermListsWithCards) as UUID[]).forEach((termListId) => {
       newTermListsWithCards[termListId].forEach((termWithCards) => {
@@ -111,14 +109,14 @@ const QuizBuilderTable: React.FC<Props> = ({
         }
       });
     });
-    onQuizCardsChange(newTermListsWithCards);
+    onChange(newTermListsWithCards);
   };
 
   const handleMultiTermQuizCardCheck = (
     cardToToggle: QuizCard,
     checked: boolean
   ) => {
-    const newTermListsWithCards = { ...termListsWithCards };
+    const newTermListsWithCards = { ...value };
     (Object.keys(newTermListsWithCards) as UUID[]).forEach((termListId) => {
       newTermListsWithCards[termListId].forEach((termWithCards) => {
         if (checked) {
@@ -130,7 +128,7 @@ const QuizBuilderTable: React.FC<Props> = ({
         }
       });
     });
-    onQuizCardsChange(newTermListsWithCards);
+    onChange(newTermListsWithCards);
   };
 
   return (

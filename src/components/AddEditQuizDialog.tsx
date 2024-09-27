@@ -2,6 +2,7 @@ import { CloseIcon } from "@/helpers/icons";
 import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import {
   CommonDialogProps,
+  QuizOrder,
   QuizSaveModel,
   Term,
   TermListObject,
@@ -66,8 +67,6 @@ const AddEditQuizDialog: React.FC<Props> = ({
   ) as TermListObject;
 
   const [checkedItems, setCheckedItems] = useState<TermListObject>({});
-  const [termListsWithCards, setTermListsWithCards] =
-    useState<TermListsWithCards>({});
 
   useEffect(() => {
     if (mode === "edit" && editingQuizId) {
@@ -81,33 +80,34 @@ const AddEditQuizDialog: React.FC<Props> = ({
         termListsWithCards: foundQuiz.termListsWithCards,
         order: foundQuiz.order,
       });
+
+      setCheckedItems(
+        cachedTermLists.reduce(
+          (acc, termList) => ({
+            ...acc,
+            [termList.id]: foundQuiz.termListsWithCards[termList.id]
+              ? foundQuiz.termListsWithCards[termList.id].map(
+                  (termWithCards) => termWithCards.term
+                )
+              : [],
+          }),
+          {}
+        )
+      );
     } else {
       setInitialValues({ ...defaultQuizSaveModel });
-    }
 
-    setCheckedItems(
-      cachedTermLists.reduce(
-        (acc, termList) => ({
-          ...acc,
-          [termList.id]: termListsWithCards[termList.id]
-            ? termListsWithCards[termList.id].map(
-                (termWithCards) => termWithCards.term
-              )
-            : [],
-        }),
-        {}
-      )
-    );
-    setTermListsWithCards(
-      cachedTermLists.reduce(
-        (acc, termList) => ({
-          ...acc,
-          [termList.id]: termListsWithCards[termList.id] ?? [],
-        }),
-        {}
-      )
-    );
-  }, [open]);
+      setCheckedItems(
+        cachedTermLists.reduce(
+          (acc, termList) => ({
+            ...acc,
+            [termList.id]: [],
+          }),
+          {}
+        )
+      );
+    }
+  }, [open, cachedTermLists, mode, editingQuizId]);
 
   const onSubmit = (values: QuizSaveModel) => {
     const { name, termListsWithCards, order } = values;
@@ -125,8 +125,8 @@ const AddEditQuizDialog: React.FC<Props> = ({
 
   const validate = (values: QuizSaveModel) => {
     const { name, termListsWithCards } = values;
-    const errors = {};
-    if (name.trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
+    const errors: { [key in keyof QuizSaveModel]?: string } = {};
+    if ((name ?? "").trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
       errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
     }
 
@@ -195,18 +195,13 @@ const AddEditQuizDialog: React.FC<Props> = ({
     setCheckedItems(checkedItemsClone);
   };
 
-  const addedTermsCount = getQuizTermCount(termListsWithCards);
-  const addedCardsCount = getQuizCardCount(termListsWithCards);
-
-  console.log("***", termListsWithCards);
-
   return (
     <Form
       initialValues={initialValues}
       onSubmit={onSubmit}
       validate={validate}
-      render={({ handleSubmit, submitting, values, errors, touched }) => (
-        <form onSubmit={handleSubmit}>
+      render={({ handleSubmit, submitting, errors, values }) => (
+        <form onSubmit={handleSubmit} autoComplete="off">
           <Dialog
             fullScreen={fullScreen}
             data-testid={"add-edit-quiz-dialog"}
@@ -266,43 +261,60 @@ const AddEditQuizDialog: React.FC<Props> = ({
                 alignItems={"center"}
                 mb={2}
               >
-                <Field
+                <Field<string>
                   name="name"
-                  render={({ value, onChange }) => (
-                    <TextField
-                      autoFocus
-                      data-testid={"quiz-name"}
-                      required
-                      label="Quiz name"
-                      fullWidth
-                      value={value}
-                      onChange={onChange}
-                      helperText={errors?.name}
-                      sx={{ mr: 3 }}
-                    />
-                  )}
+                  render={({ input, meta }) => {
+                    const showError =
+                      meta.submitFailed &&
+                      !meta.modifiedSinceLastSubmit &&
+                      (meta.error || meta.submitError);
+                    return (
+                      <TextField
+                        autoFocus
+                        data-testid={"quiz-name"}
+                        required
+                        label="Quiz name"
+                        fullWidth
+                        value={input.value}
+                        onChange={input.onChange}
+                        error={showError}
+                        helperText={
+                          showError && (
+                            <span>{meta.error || meta.submitError}</span>
+                          )
+                        }
+                        sx={{ mr: 3 }}
+                      />
+                    );
+                  }}
                 />
 
-                <FormControl fullWidth>
-                  <FormLabel id="order-group-label">Order</FormLabel>
-                  <RadioGroup
-                    aria-labelledby="order-group-label"
-                    value={values.order}
-                    name="order-group"
-                    row
-                  >
-                    <FormControlLabel
-                      value="random"
-                      control={<Radio />}
-                      label="Random"
-                    />
-                    <FormControlLabel
-                      value="in_order"
-                      control={<Radio />}
-                      label="Use list order"
-                    />
-                  </RadioGroup>
-                </FormControl>
+                <Field<QuizOrder>
+                  name="order"
+                  render={({ input, meta }) => (
+                    <FormControl fullWidth>
+                      <FormLabel id="order-group-label">Order</FormLabel>
+                      <RadioGroup
+                        aria-labelledby="order-group-label"
+                        value={input.value}
+                        name="order-group"
+                        row
+                        onChange={input.onChange}
+                      >
+                        <FormControlLabel
+                          value="random"
+                          control={<Radio />}
+                          label="Random"
+                        />
+                        <FormControlLabel
+                          value="in_order"
+                          control={<Radio />}
+                          label="Use list order"
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  )}
+                />
               </Box>
 
               <Box display={"flex"}>
@@ -378,17 +390,16 @@ const AddEditQuizDialog: React.FC<Props> = ({
                     overflow={"auto scroll"}
                     border={"1px solid gray"}
                   >
-                    <Field
+                    <Field<TermListsWithCards>
                       name="termListsWithCards"
-                      value={values.termListsWithCards}
-                      render={({ value, onChange }) => (
+                      render={({ input, meta }) => (
                         <QuizBuilderTable
                           termLists={checkedItems}
                           onRemoveTerm={(termListId, term) =>
                             handleChildChecked(termListId, term, false)
                           }
-                          termListsWithCards={value}
-                          onQuizCardsChange={onChange}
+                          value={input.value}
+                          onChange={input.onChange}
                         />
                       )}
                     />
@@ -402,7 +413,9 @@ const AddEditQuizDialog: React.FC<Props> = ({
                     )}
                     {!errors?.termListsWithCards && (
                       <Typography>
-                        {addedTermsCount} terms, {addedCardsCount} cards in quiz
+                        {getQuizTermCount(values.termListsWithCards)} terms,{" "}
+                        {getQuizCardCount(values.termListsWithCards)} cards in
+                        quiz
                       </Typography>
                     )}
                   </Box>

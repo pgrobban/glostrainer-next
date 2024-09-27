@@ -38,7 +38,7 @@ const ConfirmDeleteQuizDialog = ({
 
   return (
     <Dialog open={open}>
-      <DialogTitle>Delete quiz '{foundQuiz.name}'?</DialogTitle>
+      <DialogTitle>Delete quiz &apos;{foundQuiz.name}&apos;?</DialogTitle>
       <DialogContent>
         <DialogContentText>
           This action cannot be undone. Continue?

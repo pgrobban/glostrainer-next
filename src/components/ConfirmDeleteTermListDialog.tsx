@@ -20,8 +20,8 @@ const ConfirmDeleteTermListDialog = ({
 }: Props) => {
   return (
     <Dialog open={open}>
-      <DialogTitle>Delete term list?</DialogTitle>
-      <DialogContent>Really delete &apos;{termListName}&apos;?</DialogContent>
+      <DialogTitle>Delete term list &apos;{termListName}&apos;?</DialogTitle>
+      <DialogContent>This action cannot be undone. Continue?</DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button color="secondary" onClick={onConfirm}>
