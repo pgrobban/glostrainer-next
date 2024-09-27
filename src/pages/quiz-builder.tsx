@@ -115,7 +115,6 @@ const QuizBuilderPage: React.FC = () => {
                     }}
                     onOpenDelete={() => {
                       setQuizToDeleteId(quiz.id);
-                      setQuizToDeleteName(quiz.name);
                     }}
                   />
                 ))}

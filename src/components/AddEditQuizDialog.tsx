@@ -1,16 +1,12 @@
+import { CloseIcon } from "@/helpers/icons";
+import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import {
   CommonDialogProps,
-  Quiz,
-  QuizOrder,
   QuizSaveModel,
   Term,
   TermListObject,
   TermListsWithCards,
 } from "@/helpers/types";
-import { UUID } from "crypto";
-import { Formik, FormikBag } from "formik";
-import { useEffect, useState } from "react";
-import utilClassInstances from "../helpers/utilClassInstances";
 import {
   AppBar,
   Box,
@@ -30,12 +26,22 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { CloseIcon } from "@/helpers/icons";
 import { SimpleTreeView, TreeItem } from "@mui/x-tree-view";
-import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
+import { UUID } from "crypto";
+import { Formik, FormikErrors, FormikHelpers } from "formik";
+import { useEffect, useState } from "react";
+import utilClassInstances from "../helpers/utilClassInstances";
 import QuizBuilderTable from "./QuizBuilderTable";
-import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
+import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
 const { localStorageHelperInstance } = utilClassInstances;
+
+export const MINIMUM_QUIZ_NAME_LENGTH = 3;
+
+const defaultQuizSaveModel: QuizSaveModel = {
+  name: "",
+  termListsWithCards: {},
+  order: "random",
+};
 
 interface Props extends CommonDialogProps {
   editingQuizId?: UUID | null;
@@ -48,34 +54,112 @@ const AddEditQuizDialog: React.FC<Props> = ({
   onClose,
   onSave,
 }) => {
-  const mode = editingQuizId ? "edit" : "add";
-  const initialValues: QuizSaveModel = {
-    name: "",
-    termListsWithCards: {},
-    order: "random",
-  };
+  const [initialValues, setInitialValues] = useState({
+    ...defaultQuizSaveModel,
+  });
 
-  const onSubmit = (values, actions) => {
+  const mode = editingQuizId ? "edit" : "add";
+  const cachedTermLists = localStorageHelperInstance.getCachedTermLists();
+  const termListsObject = cachedTermLists.reduce(
+    (acc, termList) => ({ ...acc, [termList.id]: termList.terms }),
+    {}
+  ) as TermListObject;
+
+  const [checkedItems, setCheckedItems] = useState<TermListObject>({});
+  const [termListsWithCards, setTermListsWithCards] =
+    useState<TermListsWithCards>({});
+
+  useEffect(() => {
+    if (mode === "edit" && editingQuizId) {
+      const foundQuiz = localStorageHelperInstance.getQuizById(editingQuizId);
+      if (!foundQuiz) {
+        return;
+      }
+
+      setInitialValues({
+        name: foundQuiz.name,
+        termListsWithCards: foundQuiz.termListsWithCards,
+        order: foundQuiz.order,
+      });
+    } else {
+      setInitialValues({ ...defaultQuizSaveModel });
+    }
+
+    setCheckedItems(
+      cachedTermLists.reduce(
+        (acc, termList) => ({
+          ...acc,
+          [termList.id]: termListsWithCards[termList.id]
+            ? termListsWithCards[termList.id].map(
+                (termWithCards) => termWithCards.term
+              )
+            : [],
+        }),
+        {}
+      )
+    );
+    setTermListsWithCards(
+      cachedTermLists.reduce(
+        (acc, termList) => ({
+          ...acc,
+          [termList.id]: termListsWithCards[termList.id] ?? [],
+        }),
+        {}
+      )
+    );
+  }, [open]);
+
+  const onSubmit = (
+    values: QuizSaveModel,
+    formikHelpers: FormikHelpers<QuizSaveModel>
+  ) => {
     const { name, termListsWithCards, order } = values;
     const listWithName = localStorageHelperInstance.getQuizByName(name);
     const validName = !listWithName || listWithName.id === editingQuizId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
-      actions.setFieldError("name", "A quiz with this name already exists.");
+      formikHelpers.setFieldError(
+        "name",
+        "A quiz with this name already exists."
+      );
       return;
     }
 
     onSave({ name, termListsWithCards, order });
-    actions.setSubmitting(false);
+    formikHelpers.setSubmitting(false);
   };
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
+  const validate = (values: QuizSaveModel) => {
+    const { name, termListsWithCards } = values;
+    const errors: FormikErrors<Record<keyof QuizSaveModel, string>> = {};
+    if (name.trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
+      errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
+    }
+
+    const hasAtLeastOneTermWithOneCardEntered = (
+      Object.keys(termListsWithCards) as UUID[]
+    ).some(
+      (termListId) =>
+        termListsWithCards[termListId].length > 0 &&
+        termListsWithCards[termListId].some(
+          (termWithCard) => termWithCard.cards.length > 0
+        )
+    );
+    if (!hasAtLeastOneTermWithOneCardEntered) {
+      errors.termListsWithCards =
+        "At least one quiz mode needs to be selected for at least one item";
+    }
+    return errors;
+  };
+
   return (
-    <Formik
+    <Formik<QuizSaveModel>
+      enableReinitialize
       initialValues={initialValues}
       onSubmit={onSubmit}
-      enableReinitialize
+      validate={validate}
     >
       {({
         errors,
@@ -88,40 +172,6 @@ const AddEditQuizDialog: React.FC<Props> = ({
         handleSubmit,
         values,
       }) => {
-        const [checkedItems, setCheckedItems] = useState<TermListObject>({});
-        const [termListsObject, setTermListsObject] = useState<TermListObject>(
-          {}
-        );
-        const cachedTermLists = localStorageHelperInstance.getCachedTermLists();
-
-        useEffect(() => {
-          const defaultTermListsObject = cachedTermLists.reduce(
-            (acc, termList) => ({ ...acc, [termList.id]: termList.terms }),
-            {}
-          ) as TermListObject;
-
-          setTermListsObject(defaultTermListsObject);
-
-          if (mode === "edit" && editingQuizId) {
-            const foundQuiz =
-              localStorageHelperInstance.getQuizById(editingQuizId);
-            if (!foundQuiz) {
-              return;
-            }
-
-            const fields = ["name", "termListsWithCards", "order"];
-            fields.forEach((field) =>
-              setFieldValue(field, foundQuiz[field as keyof Quiz], false)
-            );
-          } else {
-            const defaultTermListsWithCards = cachedTermLists.reduce(
-              (acc, termList) => ({ ...acc, [termList.id]: [] }),
-              {}
-            ) as TermListsWithCards;
-            setFieldValue("termListsWithCards", defaultTermListsWithCards);
-          }
-        }, [open]);
-
         const getIsParentChecked = (termListId: UUID) => {
           if (!checkedItems[termListId] || !termListsObject[termListId]) {
             return false;
@@ -173,8 +223,8 @@ const AddEditQuizDialog: React.FC<Props> = ({
           setCheckedItems(checkedItemsClone);
         };
 
-        const addedTermsCount = getQuizTermCount(values.termListsWithCards);
-        const addedCardsCount = getQuizCardCount(values.termListsWithCards);
+        const addedTermsCount = getQuizTermCount(termListsWithCards);
+        const addedCardsCount = getQuizCardCount(termListsWithCards);
 
         return (
           <form>
@@ -358,7 +408,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
                         onRemoveTerm={(termListId, term) =>
                           handleChildChecked(termListId, term, false)
                         }
-                        termListsWithCards={values.termListsWithCards}
+                        termListsWithCards={termListsWithCards}
                         onQuizCardsChange={(newTermListsWithCards) =>
                           setFieldValue(
                             "termListsWithCards",
