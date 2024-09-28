@@ -1,7 +1,8 @@
 "use client";
 import { UUID } from "crypto";
 import { v4 as uuid } from "uuid";
-import { Profile, Quiz, QuizSaveModel, Term, TermList } from "./types";
+import { Profile, Quiz, Term, TermList } from "./types";
+import { QuizSaveModel } from "@/components/AddEditQuizDialog";
 
 const defaultProfile = {
   activeTermListId: null,

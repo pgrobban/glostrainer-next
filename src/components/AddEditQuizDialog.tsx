@@ -3,7 +3,6 @@ import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import {
   CommonDialogProps,
   QuizOrder,
-  QuizSaveModel,
   Term,
   TermListObject,
   TermListsWithCards,
@@ -38,11 +37,12 @@ const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
 
-const defaultQuizSaveModel: QuizSaveModel = {
+const defaultQuizSaveModel = {
   name: "",
-  termListsWithCards: {},
-  order: "random",
+  termListsWithCards: {} as TermListsWithCards,
+  order: "random" as QuizOrder,
 };
+export type QuizSaveModel = typeof defaultQuizSaveModel;
 
 interface Props extends CommonDialogProps {
   editingQuizId?: UUID | null;
@@ -65,6 +65,8 @@ const AddEditQuizDialog: React.FC<Props> = ({
     (acc, termList) => ({ ...acc, [termList.id]: termList.terms }),
     {}
   ) as TermListObject;
+
+  console.log("** re");
 
   const [checkedItems, setCheckedItems] = useState<TermListObject>({});
 
@@ -197,10 +199,11 @@ const AddEditQuizDialog: React.FC<Props> = ({
 
   return (
     <Form
+      key={initialValues.name}
       initialValues={initialValues}
       onSubmit={onSubmit}
       validate={validate}
-      render={({ handleSubmit, submitting, errors, values }) => (
+      render={({ handleSubmit, submitting, errors, values, pristine }) => (
         <form onSubmit={handleSubmit} autoComplete="off">
           <Dialog
             fullScreen={fullScreen}
@@ -268,6 +271,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
                       meta.submitFailed &&
                       !meta.modifiedSinceLastSubmit &&
                       (meta.error || meta.submitError);
+                    console.log("***", pristine);
                     return (
                       <TextField
                         autoFocus

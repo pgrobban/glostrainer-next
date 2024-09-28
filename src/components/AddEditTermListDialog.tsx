@@ -1,4 +1,4 @@
-import { CommonDialogProps, TermList } from "@/helpers/types";
+import { CommonDialogProps } from "@/helpers/types";
 import {
   Button,
   Dialog,
@@ -9,151 +9,133 @@ import {
   TextField,
 } from "@mui/material";
 import { UUID } from "crypto";
-import { FormikErrors, FormikProps, withFormik } from "formik";
 import utilClassInstances from "../helpers/utilClassInstances";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CloseIcon } from "@/helpers/icons";
+import { Field, Form, FormSpy } from "react-final-form";
 
 const { localStorageHelperInstance } = utilClassInstances;
 export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
 
+const formInitialValues = {
+  name: "",
+};
+type FormSaveModel = typeof formInitialValues;
+
 interface Props extends CommonDialogProps {
-  onSave: (newTermList: TermList) => void;
+  onSave: (formSaveModel: FormSaveModel) => void;
   editingTermListId?: UUID | null;
 }
 
-interface FormValues {
-  name: string;
-}
-
-const InnerForm = ({
-  onClose = () => {},
-  ...props
-}: Props & FormikProps<FormValues>) => {
-  const {
-    open,
-    editingTermListId,
-    touched,
-    errors,
-    isSubmitting,
-    handleChange,
-    handleSubmit,
-    setFieldTouched,
-    setFieldValue,
-    setSubmitting,
-    values,
-  } = props;
+const AddEditTermListDialog: React.FC<Props> = ({
+  open,
+  onSave,
+  editingTermListId,
+  onClose,
+}) => {
   const mode = editingTermListId ? "edit" : "add";
+  const [initialValues, setInitialValues] = useState({ ...formInitialValues });
 
   useEffect(() => {
-    if (open) {
-      setFieldValue(
-        "name",
-        mode === "add" || !editingTermListId
-          ? ""
-          : localStorageHelperInstance.getTermListById(editingTermListId)
-              ?.name || ""
-      );
-    }
-  }, [mode, open, editingTermListId]);
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <Dialog
-        data-testid={"add-edit-term-list-dialog"}
-        open={open}
-        onClose={onClose}
-      >
-        <DialogTitle>
-          {mode === "edit" ? "Edit term list" : "Create term list"}
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent>
-          <TextField
-            data-testid={"term-list-name"}
-            inputRef={(input) => input && input.focus()}
-            required
-            name="name"
-            label="Term list name"
-            fullWidth
-            value={values.name}
-            onChange={(evt) => {
-              setFieldTouched("name", false);
-              setSubmitting(false);
-              handleChange(evt);
-            }}
-            helperText={errors.name && touched.name && String(errors.name)}
-            error={isSubmitting && touched.name}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button type="submit" disabled={isSubmitting}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </form>
-  );
-};
-
-const AddEditTermListDialogForm = withFormik<Props, FormValues>({
-  mapPropsToValues: ({ editingTermListId }) => {
-    let name = "";
-    if (editingTermListId) {
-      const resolvedTermList =
+    if (mode === "edit" && editingTermListId) {
+      const foundTermList =
         localStorageHelperInstance.getTermListById(editingTermListId);
-      if (resolvedTermList) {
-        name = resolvedTermList.name;
+      if (!foundTermList) {
+        return;
       }
+      setInitialValues({ name: foundTermList.name });
+    } else {
+      setInitialValues({ ...formInitialValues });
     }
-    return {
-      name,
-    };
-  },
-  validate: (values: FormValues) => {
-    const errors: FormikErrors<FormValues> = {};
-    if (values.name.trim().length < MINIMUM_TERM_LIST_NAME_LENGTH) {
+  }, [open, mode, editingTermListId]);
+
+  const onSubmit = (values: typeof formInitialValues) => {
+    const errors: { [key in keyof FormSaveModel]?: string } = {};
+    const listWithName = localStorageHelperInstance.getTermListByName(
+      values.name
+    );
+    const validName = !listWithName || listWithName.id === editingTermListId; // allow overwriting the editing list with the same name as a UX "feature"
+    if (!validName) {
+      errors.name = "A list with this name already exists.";
+      return errors;
+    }
+    onSave(values);
+  };
+
+  const validate = (values: FormSaveModel) => {
+    const errors: { [key in keyof FormSaveModel]?: string } = {};
+    if ((values.name ?? "").trim().length < MINIMUM_TERM_LIST_NAME_LENGTH) {
       errors.name = `Please enter at least ${MINIMUM_TERM_LIST_NAME_LENGTH} characters.`;
     }
     return errors;
-  },
+  };
 
-  handleSubmit: (values, { props, ...actions }) => {
-    const { name } = values;
-    const { onSave, editingTermListId } = props;
-    const listWithName = localStorageHelperInstance.getTermListByName(name);
-    const mode = editingTermListId ? "edit" : "add";
-    const validName = !listWithName || listWithName.id === editingTermListId; // allow overwriting the editing list with the same name as a UX "feature"
-    if (!validName) {
-      actions.setFieldError("name", "A list with this name already exists.");
-      return;
-    }
-    if (mode === "add") {
-      const newTermList = localStorageHelperInstance.createNewTermList(name);
-      onSave(newTermList);
-    } else {
-      if (!editingTermListId) {
-        return;
-      }
-      const newTermList = localStorageHelperInstance.renameTermList(
-        editingTermListId,
-        name
-      )!;
-      onSave(newTermList);
-    }
-    actions.setSubmitting(false);
-  },
-})(InnerForm);
+  return (
+    <Form
+      key={initialValues.name}
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+      validate={validate}
+      render={({ handleSubmit, form }) => (
+        <form onSubmit={handleSubmit} autoComplete="off">
+          <Dialog
+            data-testid={"add-edit-term-list-dialog"}
+            open={open}
+            onClose={onClose}
+          >
+            <DialogTitle>
+              {mode === "edit" ? "Edit term list" : "Create term list"}
+            </DialogTitle>
+            <IconButton
+              aria-label="close"
+              onClick={onClose}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <DialogContent>
+              <Field<string>
+                name="name"
+                render={({ input, meta }) => {
+                  const showError =
+                    meta.submitFailed &&
+                    !meta.modifiedSinceLastSubmit &&
+                    (meta.error || meta.submitError);
+                  return (
+                    <TextField
+                      data-testid={"term-list-name"}
+                      inputRef={(input) => input && input.focus()}
+                      required
+                      label="Term list name"
+                      fullWidth
+                      value={input.value}
+                      onChange={input.onChange}
+                      error={showError}
+                      helperText={
+                        showError && (
+                          <span>{meta.error || meta.submitError}</span>
+                        )
+                      }
+                    />
+                  );
+                }}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button type="submit" onClick={handleSubmit}>
+                Save
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </form>
+      )}
+    />
+  );
+};
 
-export default AddEditTermListDialogForm;
+export default AddEditTermListDialog;

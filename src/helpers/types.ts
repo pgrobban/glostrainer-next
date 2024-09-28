@@ -52,8 +52,6 @@ export interface Quiz {
   updatedOn?: Date;
 }
 
-export type QuizSaveModel = Pick<Quiz, "name" | "termListsWithCards" | "order">;
-
 export type TermListObject = {
   [termListId: UUID]: Term[];
 };
