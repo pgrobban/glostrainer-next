@@ -1,20 +1,28 @@
+import { AddIcon, CloseIcon, DeleteIcon } from "@/helpers/icons";
 import {
   AppBar,
   Box,
   Button,
   Dialog,
+  Divider,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  NativeSelect,
+  Select,
   TextField,
   Toolbar,
   Typography,
   useTheme,
-  Divider,
-  Select,
-  FormControl,
-  MenuItem,
-  InputLabel,
-  NativeSelect,
 } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { UUID } from "crypto";
+import arrayMutators from "final-form-arrays";
+import { useEffect, useState } from "react";
+import { Field, Form } from "react-final-form";
+import { FieldArray } from "react-final-form-arrays";
+import utilClassInstances from "../../src/helpers/utilClassInstances";
 import {
   CommonDialogProps,
   Conjugation,
@@ -22,14 +30,6 @@ import {
   WordClasses,
   WordClassType,
 } from "../helpers/types";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useEffect, useState } from "react";
-import { AddIcon, CloseIcon, DeleteIcon } from "@/helpers/icons";
-import { UUID } from "crypto";
-import { Field, Form } from "react-final-form";
-import utilClassInstances from "../../src/helpers/utilClassInstances";
-import arrayMutators from "final-form-arrays";
-import { FieldArray } from "react-final-form-arrays";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -262,7 +262,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                 </Button>
               </Box>
 
-              <FieldArray name="conjugations">
+              <FieldArray<Conjugation> name="conjugations">
                 {({ fields }) =>
                   fields.map((name, index) => (
                     <Box key={name} sx={{ display: "flex" }}>

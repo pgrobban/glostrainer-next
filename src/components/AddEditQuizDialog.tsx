@@ -197,6 +197,12 @@ const AddEditQuizDialog: React.FC<Props> = ({
     setCheckedItems(checkedItemsClone);
   };
 
+  const required = (value: any) => (value ? undefined : "Required");
+  const showError = (meta: any) =>
+    meta.submitFailed &&
+    !meta.modifiedSinceLastSubmit &&
+    (meta.error || meta.submitError);
+
   return (
     <Form
       key={initialValues.name}
@@ -266,34 +272,27 @@ const AddEditQuizDialog: React.FC<Props> = ({
               >
                 <Field<string>
                   name="name"
-                  render={({ input, meta }) => {
-                    const showError =
-                      meta.submitFailed &&
-                      !meta.modifiedSinceLastSubmit &&
-                      (meta.error || meta.submitError);
-                    return (
-                      <TextField
-                        autoFocus
-                        data-testid={"quiz-name"}
-                        required
-                        label="Quiz name"
-                        fullWidth
-                        value={input.value}
-                        onChange={input.onChange}
-                        error={showError}
-                        helperText={
-                          showError && (
-                            <span>{meta.error || meta.submitError}</span>
-                          )
-                        }
-                        sx={{ mr: 3 }}
-                      />
-                    );
-                  }}
+                  render={({ input, meta }) => (
+                    <TextField
+                      autoFocus
+                      data-testid={"quiz-name"}
+                      required
+                      label="Quiz name"
+                      fullWidth
+                      value={input.value}
+                      onChange={input.onChange}
+                      error={showError(meta)}
+                      helperText={
+                        showError(meta) && (meta.error || meta.submitError)
+                      }
+                      sx={{ mr: 3 }}
+                    />
+                  )}
                 />
 
                 <Field<QuizOrder>
                   name="order"
+                  validate={required}
                   render={({ input, meta }) => (
                     <FormControl fullWidth>
                       <FormLabel id="order-group-label">Order</FormLabel>
