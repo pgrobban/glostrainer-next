@@ -28,6 +28,9 @@ import { AddIcon, CloseIcon, DeleteIcon } from "@/helpers/icons";
 import { UUID } from "crypto";
 import { Field, Form } from "react-final-form";
 import utilClassInstances from "../../src/helpers/utilClassInstances";
+import arrayMutators from "final-form-arrays";
+import { FieldArray } from "react-final-form-arrays";
+
 const { localStorageHelperInstance } = utilClassInstances;
 
 const defaultTermSaveModel: Omit<Term, "id"> = {
@@ -49,12 +52,9 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
     ...defaultTermSaveModel,
   });
 
-  const [conjugations, setConjugations] = useState<Conjugation[]>([]);
-
   useEffect(() => {
     if (!open) {
       setInitialValues({ ...defaultTermSaveModel });
-      setConjugations([]);
       return;
     }
 
@@ -64,29 +64,13 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
         (term) => term.id === editingTermId
       );
       setInitialValues(term ? { ...term } : { ...defaultTermSaveModel });
-      setConjugations(term?.conjugations || []);
     } else {
       setInitialValues({ ...defaultTermSaveModel });
-      setConjugations([]);
     }
   }, [open]);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
-
-  const addConjugation = () =>
-    setConjugations([...conjugations, { form: "", term: "" }]);
-  const removeConjugation = (index: number) =>
-    setConjugations(conjugations.filter((_, i) => i !== index));
-  const setConjugation = (
-    index: number,
-    key: keyof Conjugation,
-    value: string
-  ) => {
-    const newConjugations = [...conjugations];
-    conjugations[index][key] = value;
-    setConjugations(newConjugations);
-  };
 
   const onSubmit = (values: TermSaveModel) => {
     onSave(values);
@@ -104,11 +88,19 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
     (meta.error || meta.submitError);
 
   return (
-    <Form
+    <Form<TermSaveModel>
       key={initialValues.swedish}
       initialValues={initialValues}
+      mutators={{
+        ...arrayMutators,
+      }}
       onSubmit={onSubmit}
-      render={({ handleSubmit, submitting, errors, values, pristine }) => (
+      render={({
+        handleSubmit,
+        form: {
+          mutators: { push },
+        },
+      }) => (
         <Dialog
           onClose={onClose}
           open={open}
@@ -202,7 +194,6 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                   render={({ input, meta }) => (
                     <NativeSelect
                       inputProps={{
-                        name: "word-class",
                         id: "word-class-select-native",
                       }}
                       defaultValue={""}
@@ -265,54 +256,55 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                   variant="contained"
                   color="primary"
                   startIcon={<AddIcon />}
-                  onClick={addConjugation}
+                  onClick={() => push("conjugations", { term: "", form: "" })}
                 >
                   Add conjugation
                 </Button>
               </Box>
 
-              {conjugations.map((conjugation, index) => (
-                <Box key={index} sx={{ display: "flex" }}>
-                  <Field
-                    name={`conjugation-${index}-form`}
-                    validate={required}
-                    render={({ input, meta }) => (
-                      <TextField
-                        required
-                        label="Form"
-                        fullWidth
-                        value={conjugation.form}
-                        onChange={(evt) =>
-                          setConjugation(index, "form", evt.target.value)
-                        }
-                        error={showError(meta)}
+              <FieldArray name="conjugations">
+                {({ fields }) =>
+                  fields.map((name, index) => (
+                    <Box key={name} sx={{ display: "flex" }}>
+                      <Field
+                        name={`${name}.form`}
+                        validate={required}
+                        render={({ input, meta }) => (
+                          <TextField
+                            required
+                            label="Form"
+                            fullWidth
+                            value={input.value}
+                            onChange={input.onChange}
+                            error={showError(meta)}
+                          />
+                        )}
                       />
-                    )}
-                  />
-                  <Field
-                    name={`conjugation-${index}-term`}
-                    validate={required}
-                    render={({ input, meta }) => (
-                      <TextField
-                        required
-                        label="Term"
-                        fullWidth
-                        value={conjugation.term}
-                        onChange={(evt) =>
-                          setConjugation(index, "term", evt.target.value)
-                        }
-                        error={showError(meta)}
+                      <Field
+                        name={`${name}.term`}
+                        validate={required}
+                        render={({ input, meta }) => (
+                          <TextField
+                            required
+                            label="Term"
+                            fullWidth
+                            value={input.value}
+                            onChange={input.onChange}
+                            error={showError(meta)}
+                          />
+                        )}
                       />
-                    )}
-                  />
-                  <IconButton
-                    color="secondary"
-                    onClick={() => removeConjugation(index)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              ))}
+                      <IconButton
+                        color="secondary"
+                        onClick={() => fields.remove(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  ))
+                }
+              </FieldArray>
+
               <Divider sx={{ m: 2 }} />
 
               <Typography sx={{ mb: 1 }} variant="h6">
