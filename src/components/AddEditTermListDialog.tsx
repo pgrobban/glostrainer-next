@@ -13,6 +13,7 @@ import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect, useState } from "react";
 import { CloseIcon } from "@/helpers/icons";
 import { Field, Form, FormSpy } from "react-final-form";
+import { showError } from "@/helpers/formUtils";
 
 const { localStorageHelperInstance } = utilClassInstances;
 export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
@@ -101,29 +102,21 @@ const AddEditTermListDialog: React.FC<Props> = ({
             <DialogContent>
               <Field<string>
                 name="name"
-                render={({ input, meta }) => {
-                  const showError =
-                    meta.submitFailed &&
-                    !meta.modifiedSinceLastSubmit &&
-                    (meta.error || meta.submitError);
-                  return (
-                    <TextField
-                      data-testid={"term-list-name"}
-                      inputRef={(input) => input && input.focus()}
-                      required
-                      label="Term list name"
-                      fullWidth
-                      value={input.value}
-                      onChange={input.onChange}
-                      error={showError}
-                      helperText={
-                        showError && (
-                          <span>{meta.error || meta.submitError}</span>
-                        )
-                      }
-                    />
-                  );
-                }}
+                render={({ input, meta }) => (
+                  <TextField
+                    data-testid={"term-list-name"}
+                    inputRef={(input) => input && input.focus()}
+                    required
+                    label="Term list name"
+                    fullWidth
+                    value={input.value}
+                    onChange={input.onChange}
+                    error={showError(meta)}
+                    helperText={
+                      showError(meta) && (meta.error || meta.submitError)
+                    }
+                  />
+                )}
               />
             </DialogContent>
             <DialogActions>

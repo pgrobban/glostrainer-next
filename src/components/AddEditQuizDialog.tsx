@@ -33,6 +33,7 @@ import { useEffect, useState } from "react";
 import utilClassInstances from "../helpers/utilClassInstances";
 import QuizBuilderTable from "./QuizBuilderTable";
 import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
+import { required, showError } from "@/helpers/formUtils";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
@@ -196,12 +197,6 @@ const AddEditQuizDialog: React.FC<Props> = ({
     }
     setCheckedItems(checkedItemsClone);
   };
-
-  const required = (value: any) => (value ? undefined : "Required");
-  const showError = (meta: any) =>
-    meta.submitFailed &&
-    !meta.modifiedSinceLastSubmit &&
-    (meta.error || meta.submitError);
 
   return (
     <Form
