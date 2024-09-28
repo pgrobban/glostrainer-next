@@ -55,7 +55,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
   onClose,
   onSave,
 }) => {
-  const [initialValues, setInitialValues] = useState({
+  const [initialValues, setInitialValues] = useState<QuizSaveModel>({
     ...defaultQuizSaveModel,
   });
 
@@ -236,7 +236,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
                   type="submit"
                   disabled={submitting}
                   color="inherit"
-                  onClick={() => handleSubmit()}
+                  onClick={handleSubmit}
                 >
                   Save and close
                 </Button>
@@ -271,7 +271,6 @@ const AddEditQuizDialog: React.FC<Props> = ({
                       meta.submitFailed &&
                       !meta.modifiedSinceLastSubmit &&
                       (meta.error || meta.submitError);
-                    console.log("***", pristine);
                     return (
                       <TextField
                         autoFocus

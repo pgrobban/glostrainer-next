@@ -20,6 +20,7 @@ export interface Conjugation {
 }
 
 export interface Term {
+  id: UUID;
   type: WordClassType;
   swedish: string;
   definition: string;

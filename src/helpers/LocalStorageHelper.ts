@@ -31,6 +31,13 @@ export default class LocalStorageHelper {
       if (!storedProfile.quizzes) {
         storedProfile.quizzes = [];
       }
+      storedProfile.termLists.forEach((termList) => {
+        termList.terms.forEach((term) => {
+          if (!term.id) {
+            term.id = uuid() as UUID;
+          }
+        });
+      });
       this.cachedProfile = storedProfile;
     }
   }

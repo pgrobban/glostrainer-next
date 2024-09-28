@@ -17,7 +17,9 @@ import {
 } from "@mui/material";
 import { UUID } from "crypto";
 import { useEffect, useState } from "react";
-import AddEditTermDialog from "@/components/AddEditTermDialog";
+import AddEditTermDialog, {
+  TermSaveModel,
+} from "@/components/AddEditTermDialog";
 import type { Term, TermList as TermListType } from "../helpers/types";
 import utilClassInstances from "@/helpers/utilClassInstances";
 import ConfirmDeleteTermListDialog from "@/components/ConfirmDeleteTermListDialog";
@@ -34,7 +36,7 @@ const TermListPage: React.FC = () => {
   const [addEditTermDialogOpen, setAddEditTermDialogOpen] = useState(false);
   const [addEditTermListDialogOpen, setAddEditTermListDialogOpen] =
     useState(false);
-  const [editingTerm, setEditingTerm] = useState<Term | null>(null);
+  const [editingTermId, setEditingTermId] = useState<UUID | null>(null);
   const [expandedTermLists, setExpandedTermLists] = useState<UUID[]>([]);
   const [editingTermListId, setEditingTermListId] = useState<UUID | null>(null);
   const [cachedTermLists, setCachedTermLists] = useState<TermListType[]>([]);
@@ -68,27 +70,27 @@ const TermListPage: React.FC = () => {
     setExpandedTermLists(filteredTermListIds);
   }, [searchTerm]);
 
-  const onSaveTerm = (termToSave: Term) => {
+  const onSaveTerm = (termSaveModel: TermSaveModel) => {
     const terms = localStorageHelperInstance.getActiveTermList()?.terms || [];
     const newTerms = [...terms];
-    if (editingTerm) {
-      const termIndex = terms.findIndex(
-        (term) =>
-          term.swedish === editingTerm.swedish &&
-          term.definition === editingTerm.definition
-      );
+    const termToSave = Object.assign({}, termSaveModel, {
+      id: editingTermId,
+    }) as Term;
+
+    if (editingTermId) {
+      const termIndex = terms.findIndex((term) => term.id === editingTermId);
       newTerms.splice(termIndex, 1, termToSave);
     } else {
       newTerms.push(termToSave);
     }
     saveLocalData(newTerms);
     setAddEditTermDialogOpen(false);
-    setTimeout(() => setEditingTerm(null), 500); // don't show the title change too quickly
+    setTimeout(() => setEditingTermId(null), 500); // don't show the title change too quickly
   };
 
   const editTerm = (term: Term) => {
     setSearchTerm("");
-    setEditingTerm(term);
+    setEditingTermId(term.id);
     setAddEditTermDialogOpen(true);
   };
 
@@ -106,7 +108,7 @@ const TermListPage: React.FC = () => {
 
   const onAddTermClick = () => {
     setSearchTerm("");
-    setEditingTerm(null);
+    setEditingTermId(null);
     setAddEditTermDialogOpen(true);
   };
 
@@ -252,10 +254,9 @@ const TermListPage: React.FC = () => {
 
       <AddEditTermDialog
         open={addEditTermDialogOpen}
-        editingTerm={editingTerm}
+        editingTermId={editingTermId}
         onClose={() => setAddEditTermDialogOpen(false)}
         onSave={onSaveTerm}
-        addingToListName={activeTermListName}
       />
 
       <AddEditTermListDialog

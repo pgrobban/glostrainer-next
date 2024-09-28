@@ -1,15 +1,10 @@
-import AddEditTermDialog from "@/components/AddEditTermDialog";
+import AddEditTermDialog, {
+  TermSaveModel,
+} from "@/components/AddEditTermDialog";
 import "@testing-library/jest-dom";
-import {
-  render,
-  screen,
-  fireEvent,
-  within,
-  getByRole,
-} from "@testing-library/react";
-import utilClassInstances from "../../src/helpers/utilClassInstances";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Term } from "@/helpers/types";
+import utilClassInstances from "../../src/helpers/utilClassInstances";
 const { localStorageHelperInstance } = utilClassInstances;
 
 describe("AddEditTermDialog", () => {
@@ -32,12 +27,7 @@ describe("AddEditTermDialog", () => {
     const mockSave = jest.fn();
 
     render(
-      <AddEditTermDialog
-        addingToListName="My term list"
-        open={true}
-        onClose={() => {}}
-        onSave={mockSave}
-      />
+      <AddEditTermDialog open={true} onClose={() => {}} onSave={mockSave} />
     );
     const addEditTermListDialogElement = screen.queryByTestId(
       "add-edit-term-dialog"
@@ -77,7 +67,7 @@ describe("AddEditTermDialog", () => {
 
     expect(saveElement.closest("button")).not.toBeDisabled();
     user.click(saveElement);
-    expect(mockSave).toHaveBeenCalledWith<Term[]>({
+    expect(mockSave).toHaveBeenCalledWith<TermSaveModel[]>({
       swedish: "My term list",
       definition: "My definition",
       type: "Noun",
