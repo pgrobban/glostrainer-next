@@ -1,7 +1,14 @@
 "use client";
 import { UUID } from "crypto";
 import { v4 as uuid } from "uuid";
-import { Profile, Quiz, Term, TermList } from "./types";
+import {
+  GeneratedContent,
+  Profile,
+  Quiz,
+  QuizCard,
+  Term,
+  TermList,
+} from "./types";
 import { QuizSaveModel } from "@/components/AddEditQuizDialog";
 
 const defaultProfile = {
@@ -142,20 +149,34 @@ export default class LocalStorageHelper {
     return newTermList;
   }
 
-  createNewQuiz({ name, termListsWithCards, order }: QuizSaveModel) {
+  createNewQuiz({ name, cards, order }: QuizSaveModel) {
     const newQuiz: Quiz = {
       id: uuid() as UUID,
       name,
       createdOn: new Date(),
-      termListsWithCards,
+      cards,
       order,
     };
     this.cachedProfile.quizzes.push(newQuiz);
     return newQuiz;
   }
 
+  createQuizCard(
+    termListId: UUID,
+    termId: UUID,
+    generatedContent: GeneratedContent
+  ) {
+    const quizCard: QuizCard = {
+      id: uuid() as UUID,
+      termListId,
+      termId,
+      generatedContent,
+    };
+    return quizCard;
+  }
+
   updateQuiz(editingQuizId: UUID, quizSaveModel: QuizSaveModel) {
-    const { name, termListsWithCards, order } = quizSaveModel;
+    const { name, cards, order } = quizSaveModel;
     const quizIndex = this.cachedProfile.quizzes.findIndex(
       (quiz) => quiz.id === editingQuizId
     );
@@ -167,7 +188,7 @@ export default class LocalStorageHelper {
       name,
       createdOn: this.cachedProfile.quizzes[quizIndex].createdOn,
       updatedOn: new Date(),
-      termListsWithCards,
+      cards,
       order,
     };
   }

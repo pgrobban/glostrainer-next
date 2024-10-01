@@ -1,56 +1,46 @@
 import { StyledTableRow } from "@/helpers/styleUtils";
-import { QuizCard, Term } from "@/helpers/types";
-import { Checkbox, IconButton, TableCell } from "@mui/material";
-import { UUID } from "crypto";
-import { memo } from "react";
+import { QuizCard } from "@/helpers/types";
 import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
+import utilClassInstances from "../helpers/utilClassInstances";
+import { Button, TableCell } from "@mui/material";
+import { getReadableGeneratedContentLabel } from "@/helpers/quizUtils";
 import { DeleteIcon } from "@/helpers/icons";
+const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props {
-  termListId: UUID;
-  term: Term;
-  hasQuizCard: (termListId: UUID, term: Term, card: QuizCard) => boolean;
-  toggleQuizCardChecked: (card: QuizCard, checked: boolean, term: Term) => void;
-  onRemoveTerm: (termListId: UUID, term: Term) => void;
+  card: QuizCard;
+  onRemove: () => void;
 }
 
-const QuizBuilderTableRow = memo<Props>(
-  ({ term, termListId, hasQuizCard, toggleQuizCardChecked, onRemoveTerm }) => (
+const QuizBuilderTableRow: React.FC<Props> = ({ card, onRemove }) => {
+  const { termListId, termId } = card;
+  const termList = localStorageHelperInstance.getTermListById(termListId);
+  const term = termList?.terms.find((term) => term.id === termId);
+  if (!term) {
+    return null;
+  }
+
+  return (
     <StyledTableRow>
       <TableCell>
         <SwedishDefinitionLabel term={term} />
       </TableCell>
-      <TableCell align="center" padding="checkbox">
-        <IconButton
-          color="secondary"
-          onClick={() => onRemoveTerm(termListId, term)}
-        >
+      <TableCell>
+        {card.generatedContent && (
+          <span>
+            Generated content:
+            <br />
+            {getReadableGeneratedContentLabel(card.generatedContent)}
+          </span>
+        )}
+      </TableCell>
+      <TableCell width={60}>
+        <Button onClick={onRemove} color="secondary">
           <DeleteIcon />
-        </IconButton>
-      </TableCell>
-      <TableCell align="center" padding="checkbox">
-        <Checkbox
-          checked={hasQuizCard(termListId, term, "swedish_to_definition")}
-          onChange={(_, checked) =>
-            toggleQuizCardChecked("swedish_to_definition", checked, term)
-          }
-        />
-      </TableCell>
-      <TableCell align="center" padding="checkbox">
-        <Checkbox
-          checked={hasQuizCard(termListId, term, "definition_to_swedish")}
-          onChange={(_, checked) =>
-            toggleQuizCardChecked("definition_to_swedish", checked, term)
-          }
-        />
-      </TableCell>
-      <TableCell align="center" padding="checkbox">
-        -
+        </Button>
       </TableCell>
     </StyledTableRow>
-  )
-);
-
-QuizBuilderTableRow.displayName = "QuizBuilderTableRow";
+  );
+};
 
 export default QuizBuilderTableRow;

@@ -36,17 +36,22 @@ export interface TermList {
   updatedOn?: Date;
 }
 
-export type QuizCard = "definition_to_swedish" | "swedish_to_definition";
 export type QuizOrder = "random" | "in_order";
 
-export interface TermWithCards {
-  term: Term;
-  cards: QuizCard[];
+export type GeneratedContent =
+  | "swedish_to_definition"
+  | "definition_to_swedish";
+
+export interface QuizCard {
+  id: UUID;
+  termListId: UUID;
+  termId: UUID;
+  generatedContent?: GeneratedContent;
 }
 
 export interface Quiz {
   id: UUID;
-  termListsWithCards: TermListsWithCards;
+  cards: QuizCard[];
   name: string;
   order: QuizOrder;
   createdOn: Date;
@@ -55,10 +60,6 @@ export interface Quiz {
 
 export type TermListObject = {
   [termListId: UUID]: Term[];
-};
-
-export type TermListsWithCards = {
-  [termListId: UUID]: TermWithCards[];
 };
 
 export interface Profile {

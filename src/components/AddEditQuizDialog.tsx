@@ -1,11 +1,11 @@
+import { required, showError } from "@/helpers/formUtils";
 import { CloseIcon } from "@/helpers/icons";
-import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import {
   CommonDialogProps,
+  QuizCard,
   QuizOrder,
   Term,
   TermListObject,
-  TermListsWithCards,
 } from "@/helpers/types";
 import {
   AppBar,
@@ -28,22 +28,23 @@ import {
 } from "@mui/material";
 import { SimpleTreeView, TreeItem } from "@mui/x-tree-view";
 import { UUID } from "crypto";
-import { Form, Field } from "react-final-form";
 import { useEffect, useState } from "react";
+import { Field, Form } from "react-final-form";
 import utilClassInstances from "../helpers/utilClassInstances";
 import QuizBuilderTable from "./QuizBuilderTable";
 import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
-import { required, showError } from "@/helpers/formUtils";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
 
 const defaultQuizSaveModel = {
   name: "",
-  termListsWithCards: {} as TermListsWithCards,
+  cards: [] as QuizCard[],
   order: "random" as QuizOrder,
 };
 export type QuizSaveModel = typeof defaultQuizSaveModel;
+
+export type CheckedItems = Record<UUID, UUID[]>; // { [termListId]: termId[] }
 
 interface Props extends CommonDialogProps {
   editingQuizId?: UUID | null;
@@ -60,6 +61,9 @@ const AddEditQuizDialog: React.FC<Props> = ({
     ...defaultQuizSaveModel,
   });
 
+  const [sweEngChecked, setSweEngChecked] = useState(true);
+  const [engSweChecked, setEngSweChecked] = useState(true);
+
   const mode = editingQuizId ? "edit" : "add";
   const cachedTermLists = localStorageHelperInstance.getCachedTermLists();
   const termListsObject = cachedTermLists.reduce(
@@ -67,9 +71,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
     {}
   ) as TermListObject;
 
-  console.log("** re");
-
-  const [checkedItems, setCheckedItems] = useState<TermListObject>({});
+  const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
 
   useEffect(() => {
     if (mode === "edit" && editingQuizId) {
@@ -80,72 +82,59 @@ const AddEditQuizDialog: React.FC<Props> = ({
 
       setInitialValues({
         name: foundQuiz.name,
-        termListsWithCards: foundQuiz.termListsWithCards,
+        cards: foundQuiz.cards,
         order: foundQuiz.order,
       });
 
-      setCheckedItems(
-        cachedTermLists.reduce(
-          (acc, termList) => ({
-            ...acc,
-            [termList.id]: foundQuiz.termListsWithCards[termList.id]
-              ? foundQuiz.termListsWithCards[termList.id].map(
-                  (termWithCards) => termWithCards.term
-                )
-              : [],
-          }),
-          {}
-        )
-      );
+      setCheckedItems(getCheckedItemsFromCards(foundQuiz.cards));
     } else {
       setInitialValues({ ...defaultQuizSaveModel });
-
-      setCheckedItems(
-        cachedTermLists.reduce(
-          (acc, termList) => ({
-            ...acc,
-            [termList.id]: [],
-          }),
-          {}
-        )
-      );
+      setCheckedItems(getCheckedItemsFromCards([]));
     }
   }, [open, cachedTermLists, mode, editingQuizId]);
 
+  const getCheckedItemsFromCards = (cards: QuizCard[]): CheckedItems => {
+    const result: CheckedItems = cachedTermLists.reduce(
+      (acc, termList) => ({
+        ...acc,
+        [termList.id]: [],
+      }),
+      {}
+    );
+    cards.forEach((card) => {
+      const hasTermList = cachedTermLists.some(
+        (cachedTermList) => cachedTermList.id === card.termListId
+      );
+      if (hasTermList) {
+        (result[card.termListId] ??= []).push(card.termId);
+      } else {
+        console.error("*** cannot find term list with id", card.termListId);
+      }
+    });
+    return result;
+  };
+
   const onSubmit = (values: QuizSaveModel) => {
-    const { name, termListsWithCards, order } = values;
+    const { name, cards, order } = values;
     const listWithName = localStorageHelperInstance.getQuizByName(name);
     const validName = !listWithName || listWithName.id === editingQuizId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
       return { name: "A quiz with this name already exists." };
     }
 
-    onSave({ name, termListsWithCards, order });
+    onSave({ name, cards, order });
   };
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const validate = (values: QuizSaveModel) => {
-    const { name, termListsWithCards } = values;
+    const { name } = values;
     const errors: { [key in keyof QuizSaveModel]?: string } = {};
     if ((name ?? "").trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
       errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
     }
 
-    const hasAtLeastOneTermWithOneCardEntered = (
-      Object.keys(termListsWithCards) as UUID[]
-    ).some(
-      (termListId) =>
-        termListsWithCards[termListId].length > 0 &&
-        termListsWithCards[termListId].some(
-          (termWithCard) => termWithCard.cards.length > 0
-        )
-    );
-    if (!hasAtLeastOneTermWithOneCardEntered) {
-      errors.termListsWithCards =
-        "At least one quiz mode needs to be selected for at least one item";
-    }
     return errors;
   };
 
@@ -171,31 +160,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
     if (!checkedItems[termListId]) {
       return false;
     }
-    return checkedItems[termListId].includes(term);
-  };
-  const handleParentChecked = (termListId: UUID, checked: boolean) => {
-    const checkedItemsClone = { ...checkedItems };
-    if (checked) {
-      checkedItemsClone[termListId] = termListsObject[termListId];
-    } else {
-      checkedItemsClone[termListId] = [];
-    }
-    setCheckedItems(checkedItemsClone);
-  };
-  const handleChildChecked = (
-    termListId: UUID,
-    checkedTerm: Term,
-    checked: boolean
-  ) => {
-    const checkedItemsClone = { ...checkedItems };
-    if (checked) {
-      checkedItemsClone[termListId].push(checkedTerm);
-    } else {
-      checkedItemsClone[termListId] = checkedItems[termListId].filter(
-        (term) => term !== checkedTerm
-      );
-    }
-    setCheckedItems(checkedItemsClone);
+    return checkedItems[termListId].includes(term.id);
   };
 
   return (
@@ -204,7 +169,105 @@ const AddEditQuizDialog: React.FC<Props> = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
       validate={validate}
-      render={({ handleSubmit, submitting, errors, values, pristine }) => (
+      mutators={{
+        handleParentToggled: (args, state, utils) => {
+          const [toggledTermListId, checked] = args;
+          utils.changeValue(state, "cards", () => {
+            const checkedItemsClone = { ...checkedItems };
+            let newCardsValue: QuizCard[] = [...state.formState.values.cards];
+            if (checked) {
+              checkedItemsClone[toggledTermListId] = termListsObject[
+                toggledTermListId
+              ].map((term) => term.id);
+              checkedItemsClone[toggledTermListId].forEach((termId) => {
+                if (sweEngChecked) {
+                  newCardsValue.push(
+                    localStorageHelperInstance.createQuizCard(
+                      toggledTermListId,
+                      termId,
+                      "swedish_to_definition"
+                    )
+                  );
+                }
+                if (engSweChecked) {
+                  newCardsValue.push(
+                    localStorageHelperInstance.createQuizCard(
+                      toggledTermListId,
+                      termId,
+                      "definition_to_swedish"
+                    )
+                  );
+                }
+              });
+            } else {
+              checkedItemsClone[toggledTermListId].forEach((termId) => {
+                newCardsValue = newCardsValue.filter(
+                  (card) => card.termId !== termId
+                );
+              });
+              checkedItemsClone[toggledTermListId] = [];
+            }
+            setCheckedItems(checkedItemsClone);
+            return newCardsValue;
+          });
+        },
+        handleChildToggled: (args, state, utils) => {
+          const [termListId, toggledTermId, checked] = args;
+          utils.changeValue(state, "cards", () => {
+            const checkedItemsClone = { ...checkedItems };
+            let newCardsValue: QuizCard[] = [...state.formState.values.cards];
+
+            if (checked) {
+              checkedItemsClone[termListId].push(toggledTermId);
+              if (sweEngChecked) {
+                newCardsValue.push(
+                  localStorageHelperInstance.createQuizCard(
+                    termListId,
+                    toggledTermId,
+                    "swedish_to_definition"
+                  )
+                );
+              }
+              if (engSweChecked) {
+                newCardsValue.push(
+                  localStorageHelperInstance.createQuizCard(
+                    termListId,
+                    toggledTermId,
+                    "definition_to_swedish"
+                  )
+                );
+              }
+            } else {
+              checkedItemsClone[termListId] = checkedItems[termListId].filter(
+                (termId) => termId !== toggledTermId
+              );
+              newCardsValue = newCardsValue.filter(
+                (card) => card.termId !== toggledTermId
+              );
+            }
+            setCheckedItems(checkedItemsClone);
+            return newCardsValue;
+          });
+        },
+        handleRemoveCard: (args, state, utils) => {
+          const [cardId] = args;
+          utils.changeValue(state, "cards", () => {
+            const newCardsValue = state.formState.values.cards.filter(
+              (card: QuizCard) => card.id !== cardId
+            );
+            setCheckedItems(getCheckedItemsFromCards(newCardsValue));
+            return newCardsValue;
+          });
+        },
+      }}
+      render={({
+        handleSubmit,
+        submitting,
+        errors,
+        values,
+        pristine,
+        form,
+      }) => (
         <form onSubmit={handleSubmit} autoComplete="off">
           <Dialog
             fullScreen={fullScreen}
@@ -337,9 +400,12 @@ const AddEditQuizDialog: React.FC<Props> = ({
                                   indeterminate={getIsParentIndeterminate(
                                     termList.id
                                   )}
-                                  onChange={(_, checked) =>
-                                    handleParentChecked(termList.id, checked)
-                                  }
+                                  onChange={(_, checked) => {
+                                    form.mutators.handleParentToggled(
+                                      termList.id,
+                                      checked
+                                    );
+                                  }}
                                 />
                               }
                             />
@@ -360,9 +426,9 @@ const AddEditQuizDialog: React.FC<Props> = ({
                                         term
                                       )}
                                       onChange={(_, checked) =>
-                                        handleChildChecked(
+                                        form.mutators.handleChildToggled(
                                           termList.id,
-                                          term,
+                                          term.id,
                                           checked
                                         )
                                       }
@@ -387,32 +453,62 @@ const AddEditQuizDialog: React.FC<Props> = ({
                     overflow={"auto scroll"}
                     border={"1px solid gray"}
                   >
-                    <Field<TermListsWithCards>
-                      name="termListsWithCards"
+                    <Field<QuizCard[]>
+                      name="cards"
                       render={({ input, meta }) => (
-                        <QuizBuilderTable
-                          termLists={checkedItems}
-                          onRemoveTerm={(termListId, term) =>
-                            handleChildChecked(termListId, term, false)
-                          }
-                          value={input.value}
-                          onChange={input.onChange}
-                        />
+                        <Box>
+                          <Box
+                            bgcolor={"black"}
+                            display="flex"
+                            alignItems={"center"}
+                            justifyContent={"space-around"}
+                          >
+                            <Box
+                              bgcolor={"black"}
+                              display="flex"
+                              alignItems={"center"}
+                            >
+                              <Typography>
+                                Automatically add cards for:
+                              </Typography>
+                              <FormControlLabel
+                                sx={{ ml: 1 }}
+                                checked={sweEngChecked}
+                                onChange={(e, checked) =>
+                                  setSweEngChecked(checked)
+                                }
+                                control={<Checkbox />}
+                                label="SWE-ENG"
+                              />
+                              <FormControlLabel
+                                sx={{ ml: 1 }}
+                                checked={engSweChecked}
+                                onChange={(e, checked) =>
+                                  setEngSweChecked(checked)
+                                }
+                                control={<Checkbox />}
+                                label="ENG-SWE"
+                              />
+                            </Box>
+                            <Box>hello</Box>
+                          </Box>
+
+                          <QuizBuilderTable
+                            onRemoveCard={(cardId) =>
+                              form.mutators.handleRemoveCard(cardId)
+                            }
+                            cards={input.value}
+                            onChange={input.onChange}
+                          />
+                        </Box>
                       )}
                     />
                   </Box>
                   <Box mt={1}>
-                    {errors?.termListsWithCards && (
+                    {errors?.quizCards && (
                       <Typography color="orange">
                         At least one term with at least one card needs to be
                         selected in the quiz
-                      </Typography>
-                    )}
-                    {!errors?.termListsWithCards && (
-                      <Typography>
-                        {getQuizTermCount(values.termListsWithCards)} terms,{" "}
-                        {getQuizCardCount(values.termListsWithCards)} cards in
-                        quiz
                       </Typography>
                     )}
                   </Box>

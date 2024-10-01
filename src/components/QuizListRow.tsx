@@ -1,6 +1,5 @@
 import { getLocalDateTime } from "@/helpers/dateUtils";
 import { DeleteIcon, PlayIcon } from "@/helpers/icons";
-import { getQuizCardCount, getQuizTermCount } from "@/helpers/quizUtils";
 import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
 import { Quiz } from "@/helpers/types";
 import { Button } from "@mui/material";
@@ -13,10 +12,9 @@ interface Props {
 }
 
 const QuizListRow = memo(({ quiz, onOpenEdit, onOpenDelete }: Props) => {
-  const { name, termListsWithCards, updatedOn, createdOn } = quiz;
-
-  const termsCount = getQuizTermCount(termListsWithCards);
-  const cardsCount = getQuizCardCount(termListsWithCards);
+  const { name, updatedOn, createdOn, cards } = quiz;
+  const termsCount = 0;
+  const cardsCount = cards.length;
 
   return (
     <StyledTableRow onClick={onOpenEdit}>
