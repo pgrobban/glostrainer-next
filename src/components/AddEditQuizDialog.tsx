@@ -77,26 +77,29 @@ const AddEditQuizDialog: React.FC<Props> = ({
 
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
 
-  const getCheckedItemsFromCards = useCallback((cards: QuizCard[]) => {
-    const result: CheckedItems = cachedTermLists.reduce(
-      (acc, termList) => ({
-        ...acc,
-        [termList.id]: [],
-      }),
-      {}
-    );
-    cards.forEach((card) => {
-      const hasTermList = cachedTermLists.some(
-        (cachedTermList) => cachedTermList.id === card.termListId
+  const getCheckedItemsFromCards = useCallback(
+    (cards: QuizCard[]) => {
+      const result: CheckedItems = cachedTermLists.reduce(
+        (acc, termList) => ({
+          ...acc,
+          [termList.id]: [],
+        }),
+        {}
       );
-      if (hasTermList) {
-        (result[card.termListId] ??= []).push(card.termId);
-      } else {
-        console.error("*** cannot find term list with id", card.termListId);
-      }
-    });
-    return result;
-  }, []);
+      cards.forEach((card) => {
+        const hasTermList = cachedTermLists.some(
+          (cachedTermList) => cachedTermList.id === card.termListId
+        );
+        if (hasTermList) {
+          (result[card.termListId] ??= []).push(card.termId);
+        } else {
+          console.error("*** cannot find term list with id", card.termListId);
+        }
+      });
+      return result;
+    },
+    [cachedTermLists]
+  );
 
   useEffect(() => {
     if (mode === "edit" && editingQuizId) {
@@ -133,10 +136,13 @@ const AddEditQuizDialog: React.FC<Props> = ({
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const validate = (values: QuizSaveModel) => {
-    const { name } = values;
+    const { name, cards } = values;
     const errors: { [key in keyof QuizSaveModel]?: string } = {};
     if ((name ?? "").trim().length < MINIMUM_QUIZ_NAME_LENGTH) {
       errors.name = `Please enter at least ${MINIMUM_QUIZ_NAME_LENGTH} characters.`;
+    }
+    if (cards.length === 0) {
+      errors.cards = "Please add at least one card to the list.";
     }
 
     return errors;
@@ -457,34 +463,38 @@ const AddEditQuizDialog: React.FC<Props> = ({
 
                 <Box flexBasis={"70%"}>
                   <Typography>3. Review your list</Typography>
-                  <Box
-                    height={400}
-                    overflow={"auto scroll"}
-                    border={"1px solid gray"}
-                  >
-                    <Field<QuizCard[]>
-                      name="cards"
-                      render={({ input, meta }) => (
-                        <QuizBuilderTable
-                          cards={input.value}
-                          onRemoveCard={(cardId) =>
-                            form.mutators.handleRemoveCard(cardId)
-                          }
-                        />
-                      )}
-                    />
-                  </Box>
-                  <Box mt={1}>
-                    {errors?.quizCards && (
-                      <Typography color="orange">
-                        At least one term with at least one card needs to be
-                        selected in the quiz
-                      </Typography>
+                  <Field<QuizCard[]>
+                    name="cards"
+                    render={({ input, meta }) => (
+                      <>
+                        <Box
+                          height={400}
+                          overflow={"auto scroll"}
+                          border={"1px solid gray"}
+                        >
+                          <QuizBuilderTable
+                            cards={input.value}
+                            onRemoveCard={(cardId) =>
+                              form.mutators.handleRemoveCard(cardId)
+                            }
+                          />
+                        </Box>
+                        <Box mt={1}>
+                          {showError(meta) && (
+                            <Typography color="red">{meta.error}</Typography>
+                          )}
+                          {!showError(meta) && (
+                            <Typography>
+                              {getCardCount(form.getState().values.cards)}{" "}
+                              card(s) in deck, generated from{" "}
+                              {getTermCount(form.getState().values.cards)}{" "}
+                              term(s)
+                            </Typography>
+                          )}
+                        </Box>
+                      </>
                     )}
-                  </Box>
-                  {getCardCount(form.getState().values.cards)} card(s) in deck,
-                  generated from {getTermCount(form.getState().values.cards)}{" "}
-                  term(s)
+                  />
                 </Box>
               </Box>
             </DialogContent>

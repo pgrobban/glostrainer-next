@@ -16,6 +16,7 @@ import {
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { visuallyHidden } from "@mui/utils";
 import { useMemo, useState } from "react";
+import TermRow from "./TermRow";
 
 interface Props {
   terms: Term[];
@@ -133,30 +134,12 @@ const TermList: React.FC<Props> = ({
         </TableHead>
         <TableBody>
           {sortedTerms.map((term, index) => (
-            <StyledTableRow
-              key={index}
-              onClick={(evt) => {
-                evt.bubbles = false;
-                onEditTerm(term);
-              }}
-            >
-              <StyledTableCell>{term.swedish}</StyledTableCell>
-              <StyledTableCell>{term.definition}</StyledTableCell>
-              <StyledTableCell>{term.type}</StyledTableCell>
-              <StyledTableCell>{term.notes}</StyledTableCell>
-              <StyledTableCell padding="none">
-                <Button
-                  color="secondary"
-                  variant="outlined"
-                  onClick={(evt) => {
-                    evt.stopPropagation();
-                    onDeleteTerm(term);
-                  }}
-                >
-                  <DeleteIcon />
-                </Button>
-              </StyledTableCell>
-            </StyledTableRow>
+            <TermRow
+              key={term.id}
+              term={term}
+              onClickEdit={() => onEditTerm(term)}
+              onClickDelete={() => onDeleteTerm(term)}
+            />
           ))}
           <TableRow>
             <TableCell>

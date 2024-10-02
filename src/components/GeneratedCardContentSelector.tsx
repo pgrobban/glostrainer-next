@@ -24,11 +24,10 @@ interface Props {
 }
 
 const GenerateCardContentSelector: React.FC<Props> = ({ value, onChange }) => (
-  <FormControl fullWidth>
+  <FormControl fullWidth error={value.length === 0}>
     <Select<ContentToGenerate[]>
       multiple
       value={value}
-      error={value.length === 0}
       onChange={(e) =>
         onChange(
           (typeof e.target.value === "string"
