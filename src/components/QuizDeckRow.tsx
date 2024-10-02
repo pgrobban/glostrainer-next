@@ -1,5 +1,6 @@
 import { getLocalDateTime } from "@/helpers/dateUtils";
 import { DeleteIcon, PlayIcon } from "@/helpers/icons";
+import { getCardCount, getTermCount } from "@/helpers/quizUtils";
 import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
 import { Quiz } from "@/helpers/types";
 import { Button } from "@mui/material";
@@ -11,16 +12,14 @@ interface Props {
   onOpenDelete: () => void;
 }
 
-const QuizListRow = memo(({ quiz, onOpenEdit, onOpenDelete }: Props) => {
+const QuizDeckRow = memo(({ quiz, onOpenEdit, onOpenDelete }: Props) => {
   const { name, updatedOn, createdOn, cards } = quiz;
-  const termsCount = 0;
-  const cardsCount = cards.length;
 
   return (
     <StyledTableRow onClick={onOpenEdit}>
       <StyledTableCell>{name}</StyledTableCell>
-      <StyledTableCell>{termsCount}</StyledTableCell>
-      <StyledTableCell>{cardsCount}</StyledTableCell>
+      <StyledTableCell>{getTermCount(cards)}</StyledTableCell>
+      <StyledTableCell>{getCardCount(cards)}</StyledTableCell>
       <StyledTableCell>
         {updatedOn ? getLocalDateTime(updatedOn) : getLocalDateTime(createdOn)}
       </StyledTableCell>
@@ -36,6 +35,6 @@ const QuizListRow = memo(({ quiz, onOpenEdit, onOpenDelete }: Props) => {
   );
 });
 
-QuizListRow.displayName = "QuizListRow";
+QuizDeckRow.displayName = "QuizDeckRow";
 
-export default QuizListRow;
+export default QuizDeckRow;

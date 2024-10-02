@@ -38,15 +38,28 @@ export interface TermList {
 
 export type QuizOrder = "random" | "in_order";
 
-export type GeneratedContent =
+export type ContentToGenerate =
   | "swedish_to_definition"
-  | "definition_to_swedish";
+  | "definition_to_swedish"
+  | "singular_indefinite_to_singular_indefinite"
+  | "singular_indefinite_to_plural_indefinite"
+  | "singular_definite_to_plural_definite"
+  | "plural_indefinite_to_plural_indefinite"
+  | "dictionary_form_to_present_tense"
+  | "dictionary_form_to_past_tense"
+  | "dictionary_form_to_perfect_tense"
+  | "present_tense_to_dictionary_form";
 
 export interface QuizCard {
   id: UUID;
   termListId: UUID;
   termId: UUID;
-  generatedContent?: GeneratedContent;
+  contentToGenerate?: ContentToGenerate;
+}
+
+export interface CardContent {
+  front: string;
+  back: string;
 }
 
 export interface Quiz {

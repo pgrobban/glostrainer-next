@@ -1,4 +1,4 @@
-import QuizListRow from "@/components/QuizListRow";
+import QuizDeckRow from "@/components/QuizDeckRow";
 import AddEditQuizDialog from "@/components/AddEditQuizDialog";
 import type { Quiz, Term } from "@/helpers/types";
 import utilClassInstances from "@/helpers/utilClassInstances";
@@ -41,7 +41,7 @@ const QuizBuilderPage: React.FC = () => {
     setIsLoading(false);
   }, []);
 
-  const onCreateQuizListClick = () => {
+  const onCreateQuizDeckClick = () => {
     setAddEditQuizDialogOpen(true);
   };
 
@@ -69,7 +69,7 @@ const QuizBuilderPage: React.FC = () => {
                   >
                     <Box display={"flex"} justifyContent={"space-between"}>
                       <Box textAlign={"center"} width={"100%"}>
-                        <Typography variant="h4">My quiz lists</Typography>
+                        <Typography variant="h4">My quiz decks</Typography>
                       </Box>
                       <Input
                         sx={{ width: "250px" }}
@@ -106,7 +106,7 @@ const QuizBuilderPage: React.FC = () => {
               </TableHead>
               <TableBody>
                 {cachedQuizzes.map((quiz) => (
-                  <QuizListRow
+                  <QuizDeckRow
                     key={`quiz-list-row-${quiz.id}`}
                     quiz={quiz}
                     onOpenEdit={() => {
@@ -128,9 +128,9 @@ const QuizBuilderPage: React.FC = () => {
             variant="contained"
             color="primary"
             startIcon={<AddToListIcon />}
-            onClick={onCreateQuizListClick}
+            onClick={onCreateQuizDeckClick}
           >
-            Create quiz
+            Create quiz deck
           </Button>
         </WithLoading>
       </Box>

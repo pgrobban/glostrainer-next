@@ -2,7 +2,7 @@
 import { UUID } from "crypto";
 import { v4 as uuid } from "uuid";
 import {
-  GeneratedContent,
+  ContentToGenerate,
   Profile,
   Quiz,
   QuizCard,
@@ -164,13 +164,13 @@ export default class LocalStorageHelper {
   createQuizCard(
     termListId: UUID,
     termId: UUID,
-    generatedContent: GeneratedContent
+    contentToGenerate: ContentToGenerate
   ) {
     const quizCard: QuizCard = {
       id: uuid() as UUID,
       termListId,
       termId,
-      generatedContent,
+      contentToGenerate,
     };
     return quizCard;
   }

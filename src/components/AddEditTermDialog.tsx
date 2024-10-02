@@ -67,7 +67,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
     } else {
       setInitialValues({ ...defaultTermSaveModel });
     }
-  }, [open]);
+  }, [open, editingTermId]);
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));

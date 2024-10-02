@@ -1,34 +1,30 @@
-import { QuizCard, Term, TermListObject } from "@/helpers/types";
+import { QuizCard } from "@/helpers/types";
 import {
-  Box,
-  Checkbox,
-  FormControlLabel,
   Table,
   TableBody,
-  Typography,
+  TableCell,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { UUID } from "crypto";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React from "react";
 import QuizBuilderTableRow from "./QuizBuilderTableRow";
-
-type CardsGroupedByTerm = Record<UUID, QuizCard[]>;
 
 interface Props {
   onRemoveCard: (cardId: UUID) => void;
   cards: QuizCard[];
-  onChange: (newQuizCards: QuizCard[]) => void;
 }
 
-const QuizBuilderTable: React.FC<Props> = ({
-  cards,
-  onRemoveCard,
-  onChange,
-}) => {
-  const [cardsGroupedByTerm, setCardsGroupedByTerm] =
-    useState<CardsGroupedByTerm>({});
-
+const QuizBuilderTable: React.FC<Props> = ({ cards, onRemoveCard }) => {
   return (
-    <Table>
+    <Table stickyHeader>
+      <TableHead>
+        <TableRow>
+          <TableCell>Front</TableCell>
+          <TableCell>Back</TableCell>
+          <TableCell width={60}></TableCell>
+        </TableRow>
+      </TableHead>
       <TableBody>
         {cards.map((card) => (
           <QuizBuilderTableRow
