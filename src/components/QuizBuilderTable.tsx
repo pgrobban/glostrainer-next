@@ -30,8 +30,6 @@ const QuizBuilderTable: React.FC<Props> = ({
   const handleDragEnd: OnDragEndResponder = (e) => {
     if (!e.destination) return;
 
-    console.log("*** in drag end");
-
     const cardId = e.draggableId as UUID;
     moveCard(cardId, e.destination.index);
   };
@@ -49,10 +47,7 @@ const QuizBuilderTable: React.FC<Props> = ({
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppable-quiz-table">
           {(droppableProvided) => (
-            <TableBody
-              ref={droppableProvided.innerRef}
-              {...droppableProvided.droppableProps}
-            >
+            <TableBody {...droppableProvided.droppableProps}>
               {cards.map((card, index) => (
                 <Draggable key={card.id} draggableId={card.id} index={index}>
                   {(draggableProvided) => (

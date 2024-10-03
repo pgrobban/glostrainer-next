@@ -262,6 +262,19 @@ const AddEditQuizDialog: React.FC<Props> = ({
             return newCardsValue;
           });
         },
+        moveCard: (args, state, utils) => {
+          const [cardId, newIndex] = args;
+          utils.changeValue(state, "cards", () => {
+            // @ts-expect-error
+            const newCardsValue = [...state.formState.values.cards];
+            const oldIndex = newCardsValue.findIndex(
+              (card) => card.id === cardId
+            );
+            const [removed] = newCardsValue.splice(oldIndex, 1);
+            newCardsValue.splice(newIndex, 0, removed);
+            return newCardsValue;
+          });
+        },
       }}
       render={({
         handleSubmit,
@@ -474,9 +487,8 @@ const AddEditQuizDialog: React.FC<Props> = ({
                         >
                           <QuizBuilderTable
                             cards={input.value}
-                            onRemoveCard={(cardId) =>
-                              form.mutators.handleRemoveCard(cardId)
-                            }
+                            onRemoveCard={form.mutators.handleRemoveCard}
+                            moveCard={form.mutators.moveCard}
                           />
                         </Box>
                         <Box mt={1}>
