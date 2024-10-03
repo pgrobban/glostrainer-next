@@ -14,7 +14,7 @@ import {
   Draggable,
   Droppable,
   OnDragEndResponder,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 
 interface Props {
   onRemoveCard: (cardId: UUID) => void;
