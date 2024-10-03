@@ -9,31 +9,67 @@ import {
 import { UUID } from "crypto";
 import React from "react";
 import QuizBuilderTableRow from "./QuizBuilderTableRow";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  OnDragEndResponder,
+} from "react-beautiful-dnd";
 
 interface Props {
   onRemoveCard: (cardId: UUID) => void;
   cards: QuizCard[];
+  moveCard: (cardId: UUID, newIndex: number) => void;
 }
 
-const QuizBuilderTable: React.FC<Props> = ({ cards, onRemoveCard }) => {
+const QuizBuilderTable: React.FC<Props> = ({
+  cards,
+  onRemoveCard,
+  moveCard,
+}) => {
+  const handleDragEnd: OnDragEndResponder = (e) => {
+    if (!e.destination) return;
+
+    console.log("*** in drag end");
+
+    const cardId = e.draggableId as UUID;
+    moveCard(cardId, e.destination.index);
+  };
+
   return (
-    <Table stickyHeader>
+    <Table stickyHeader size="small">
       <TableHead>
         <TableRow>
+          <TableCell>{/* drag to reorder */}</TableCell>
           <TableCell>Front</TableCell>
           <TableCell>Back</TableCell>
           <TableCell width={60}></TableCell>
         </TableRow>
       </TableHead>
-      <TableBody>
-        {cards.map((card) => (
-          <QuizBuilderTableRow
-            key={card.id}
-            card={card}
-            onRemove={() => onRemoveCard(card.id)}
-          />
-        ))}
-      </TableBody>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="droppable-quiz-table">
+          {(droppableProvided) => (
+            <TableBody
+              ref={droppableProvided.innerRef}
+              {...droppableProvided.droppableProps}
+            >
+              {cards.map((card, index) => (
+                <Draggable key={card.id} draggableId={card.id} index={index}>
+                  {(draggableProvided) => (
+                    <QuizBuilderTableRow
+                      key={card.id}
+                      card={card}
+                      onRemove={() => onRemoveCard(card.id)}
+                      draggableProvided={draggableProvided}
+                    />
+                  )}
+                </Draggable>
+              ))}
+              {droppableProvided.placeholder}
+            </TableBody>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Table>
   );
 };
