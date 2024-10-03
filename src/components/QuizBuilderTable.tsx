@@ -47,7 +47,10 @@ const QuizBuilderTable: React.FC<Props> = ({
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppable-quiz-table">
           {(droppableProvided) => (
-            <TableBody {...droppableProvided.droppableProps}>
+            <TableBody
+              ref={droppableProvided.innerRef}
+              {...droppableProvided.droppableProps}
+            >
               {cards.map((card, index) => (
                 <Draggable key={card.id} draggableId={card.id} index={index}>
                   {(draggableProvided) => (
