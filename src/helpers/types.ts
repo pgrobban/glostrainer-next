@@ -1,4 +1,5 @@
 import { UUID } from "crypto";
+import { ReactNode } from "react";
 
 export const WordClasses = [
   "Noun",
@@ -57,10 +58,11 @@ export interface QuizCard {
   contentToGenerate?: ContentToGenerate;
 }
 
-export interface CardContent {
-  front: string;
-  back: string;
-}
+export type CardSide = "front" | "back";
+
+export type QuizCardContentTemplateData = { [key in CardSide]: string };
+
+export type QuizCardContent = { [key in CardSide]: ReactNode };
 
 export interface Quiz {
   id: UUID;

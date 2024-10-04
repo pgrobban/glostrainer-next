@@ -19,8 +19,8 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { MenuIcon } from "@/helpers/icons";
 
-const pages = ["Terms", "Quiz builder", "Manage data"] as const;
-const pagePaths = ["/terms", "/quiz-builder", "/manage-data"] as const;
+const pages = ["Term lists", "Quizzes", "Manage data"] as const;
+const pagePaths = ["/terms", "/quizzes", "/manage-data"] as const;
 const settings: string[] = [];
 
 const ResponsiveAppBar = () => {

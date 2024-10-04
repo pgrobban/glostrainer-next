@@ -25,6 +25,7 @@ import { ClearIcon, SearchIcon } from "@/helpers/icons";
 import { UUID } from "crypto";
 import { StyledTableHeadRow } from "@/helpers/styleUtils";
 import ConfirmDeleteQuizDialog from "@/components/ConfirmDeleteQuizDialog";
+import QuizPlayerDialog from "@/components/QuizPlayerDialog";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -35,6 +36,7 @@ const QuizBuilderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [cachedQuizzes, setCachedQuizzes] = useState<Quiz[]>([]);
+  const [playingQuiz, setPlayingQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
     setCachedQuizzes(localStorageHelperInstance.getCachedQuizzes());
@@ -116,6 +118,7 @@ const QuizBuilderPage: React.FC = () => {
                     onOpenDelete={() => {
                       setQuizToDeleteId(quiz.id);
                     }}
+                    onPlay={() => setPlayingQuiz(quiz)}
                   />
                 ))}
               </TableBody>
@@ -163,6 +166,12 @@ const QuizBuilderPage: React.FC = () => {
           setQuizToDeleteId(null);
           setCachedQuizzes(localStorageHelperInstance.getCachedQuizzes());
         }}
+      />
+
+      <QuizPlayerDialog
+        open={!!playingQuiz}
+        quiz={playingQuiz}
+        onClose={() => setPlayingQuiz(null)}
       />
     </>
   );

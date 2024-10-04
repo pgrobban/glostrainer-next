@@ -1,3 +1,5 @@
+import { showError } from "@/helpers/formUtils";
+import { CloseIcon } from "@/helpers/icons";
 import { CommonDialogProps } from "@/helpers/types";
 import {
   Button,
@@ -9,11 +11,9 @@ import {
   TextField,
 } from "@mui/material";
 import { UUID } from "crypto";
-import utilClassInstances from "../helpers/utilClassInstances";
 import { useEffect, useState } from "react";
-import { CloseIcon } from "@/helpers/icons";
-import { Field, Form, FormSpy } from "react-final-form";
-import { showError } from "@/helpers/formUtils";
+import { Field, Form } from "react-final-form";
+import utilClassInstances from "../helpers/utilClassInstances";
 
 const { localStorageHelperInstance } = utilClassInstances;
 export const MINIMUM_TERM_LIST_NAME_LENGTH = 3;
