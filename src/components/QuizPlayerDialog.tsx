@@ -17,10 +17,14 @@ import {
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
+import { UUID } from "crypto";
 import React, { useEffect, useState } from "react";
 
+import utilClassInstances from "../helpers/utilClassInstances";
+const { localStorageHelperInstance } = utilClassInstances;
+
 interface Props extends CommonDialogProps {
-  quiz?: Quiz | null;
+  quizId?: UUID | null;
 }
 
 const Transition = React.forwardRef(function Transition(
@@ -32,13 +36,18 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quiz }) => {
+const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quizId }) => {
   const [cardsRemaining, setCardsRemaining] = useState<QuizCard[]>([]);
   const [viewingCardSide, setViewingCardSide] = useState<CardSide>("front");
   const currentCard = cardsRemaining[0];
 
   useEffect(() => {
-    if (open && quiz) {
+    if (open && quizId) {
+      const quiz = localStorageHelperInstance.getQuizById(quizId);
+      if (!quiz) {
+        return;
+      }
+
       const newCardsRemaining = [...quiz.cards];
       if (quiz.order === "in_order") {
         setCardsRemaining(newCardsRemaining);
@@ -50,11 +59,7 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quiz }) => {
       setCardsRemaining([]);
     }
     setViewingCardSide("front");
-  }, [open, quiz]);
-
-  if (!quiz) {
-    return null;
-  }
+  }, [open, quizId]);
 
   const onFlipToBack = () => setViewingCardSide("back");
   const removeCard = () => {
@@ -105,8 +110,12 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quiz }) => {
             )}
             {viewingCardSide === "back" && (
               <>
-                <Button onClick={removeCard}>Got it</Button>
-                <Button onClick={shuffleCard}>I need more practice</Button>
+                <Button onClick={removeCard} color="success">
+                  Got it
+                </Button>
+                <Button onClick={shuffleCard} color="warning">
+                  I need more practice
+                </Button>
               </>
             )}
           </>

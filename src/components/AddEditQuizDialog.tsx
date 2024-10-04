@@ -44,6 +44,7 @@ const defaultQuizSaveModel = {
   name: "",
   cards: [] as QuizCard[],
   order: "random" as QuizOrder,
+  actionAfterSubmit: "close" as "close" | "close_and_play",
 };
 export type QuizSaveModel = typeof defaultQuizSaveModel;
 
@@ -112,6 +113,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
         name: foundQuiz.name,
         cards: foundQuiz.cards,
         order: foundQuiz.order,
+        actionAfterSubmit: "close",
       });
 
       setCheckedItems(getCheckedItemsFromCards(foundQuiz.cards));
@@ -122,14 +124,14 @@ const AddEditQuizDialog: React.FC<Props> = ({
   }, [open, cachedTermLists, mode, editingQuizId, getCheckedItemsFromCards]);
 
   const onSubmit = (values: QuizSaveModel) => {
-    const { name, cards, order } = values;
+    const { name, cards, order, actionAfterSubmit } = values;
     const listWithName = localStorageHelperInstance.getQuizByName(name);
     const validName = !listWithName || listWithName.id === editingQuizId; // allow overwriting the editing list with the same name as a UX "feature"
     if (!validName) {
       return { name: "A quiz with this name already exists." };
     }
 
-    onSave({ name, cards, order });
+    onSave({ name, cards, order, actionAfterSubmit });
   };
 
   const theme = useTheme();
@@ -148,30 +150,39 @@ const AddEditQuizDialog: React.FC<Props> = ({
     return errors;
   };
 
-  const getIsParentChecked = (termListId: UUID) => {
-    if (!checkedItems[termListId] || !termListsObject[termListId]) {
-      return false;
-    }
-    return (
-      checkedItems[termListId].length === termListsObject[termListId].length
-    );
-  };
+  const getIsParentChecked = useCallback(
+    (termListId: UUID) => {
+      if (!checkedItems[termListId] || !termListsObject[termListId]) {
+        return false;
+      }
+      return (
+        checkedItems[termListId].length === termListsObject[termListId].length
+      );
+    },
+    [checkedItems, termListsObject]
+  );
 
-  const getIsParentIndeterminate = (termListId: UUID) => {
-    if (!checkedItems[termListId] || !termListsObject[termListId]) {
-      return false;
-    }
-    return (
-      !getIsParentChecked(termListId) && checkedItems[termListId].length > 0
-    );
-  };
+  const getIsParentIndeterminate = useCallback(
+    (termListId: UUID) => {
+      if (!checkedItems[termListId] || !termListsObject[termListId]) {
+        return false;
+      }
+      return (
+        !getIsParentChecked(termListId) && checkedItems[termListId].length > 0
+      );
+    },
+    [checkedItems, getIsParentChecked, termListsObject]
+  );
 
-  const getIsChildChecked = (termListId: UUID, term: Term) => {
-    if (!checkedItems[termListId]) {
-      return false;
-    }
-    return checkedItems[termListId].includes(term.id);
-  };
+  const getIsChildChecked = useCallback(
+    (termListId: UUID, term: Term) => {
+      if (!checkedItems[termListId]) {
+        return false;
+      }
+      return checkedItems[termListId].includes(term.id);
+    },
+    [checkedItems]
+  );
 
   return (
     <Form
@@ -313,14 +324,21 @@ const AddEditQuizDialog: React.FC<Props> = ({
                   {mode === "edit" ? "Edit quiz deck" : "Create quiz deck"}
                 </Typography>
                 <Button
-                  type="submit"
-                  disabled={submitting}
                   color="inherit"
-                  onClick={handleSubmit}
+                  onClick={() => {
+                    form.change("actionAfterSubmit", "close");
+                    form.submit();
+                  }}
                 >
                   Save and close
                 </Button>
-                <Button disabled={true} color="inherit" onClick={() => {}}>
+                <Button
+                  color="inherit"
+                  onClick={() => {
+                    form.change("actionAfterSubmit", "close_and_play");
+                    form.submit();
+                  }}
+                >
                   Save and play
                 </Button>
               </Toolbar>

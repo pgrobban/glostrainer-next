@@ -36,7 +36,7 @@ const QuizBuilderPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [cachedQuizzes, setCachedQuizzes] = useState<Quiz[]>([]);
-  const [playingQuiz, setPlayingQuiz] = useState<Quiz | null>(null);
+  const [playingQuizId, setPlayingQuizId] = useState<UUID | null>(null);
 
   useEffect(() => {
     setCachedQuizzes(localStorageHelperInstance.getCachedQuizzes());
@@ -118,7 +118,7 @@ const QuizBuilderPage: React.FC = () => {
                     onOpenDelete={() => {
                       setQuizToDeleteId(quiz.id);
                     }}
-                    onPlay={() => setPlayingQuiz(quiz)}
+                    onPlay={() => setPlayingQuizId(quiz.id)}
                   />
                 ))}
               </TableBody>
@@ -142,15 +142,22 @@ const QuizBuilderPage: React.FC = () => {
         open={addEditQuizDialogOpen}
         editingQuizId={editingQuizId}
         onSave={(quizSaveModel) => {
+          let quizId = editingQuizId;
           if (editingQuizId) {
             localStorageHelperInstance.updateQuiz(editingQuizId, quizSaveModel);
           } else {
-            localStorageHelperInstance.createNewQuiz(quizSaveModel);
+            const newQuiz =
+              localStorageHelperInstance.createNewQuiz(quizSaveModel);
+            quizId = newQuiz.id;
           }
 
           localStorageHelperInstance.saveData();
           setEditingQuizId(null);
           setAddEditQuizDialogOpen(false);
+
+          if (quizSaveModel.actionAfterSubmit === "close_and_play" && quizId) {
+            setPlayingQuizId(quizId);
+          }
         }}
         onClose={() => {
           setEditingQuizId(null);
@@ -169,9 +176,9 @@ const QuizBuilderPage: React.FC = () => {
       />
 
       <QuizPlayerDialog
-        open={!!playingQuiz}
-        quiz={playingQuiz}
-        onClose={() => setPlayingQuiz(null)}
+        open={!!playingQuizId}
+        quizId={playingQuizId}
+        onClose={() => setPlayingQuizId(null)}
       />
     </>
   );
