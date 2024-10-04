@@ -48,9 +48,9 @@ export const getTermCount = (cards: QuizCard[]) =>
   // @ts-expect-error
   [...new Set(cards.map((card) => card.termId))].length;
 
-const emptyCard = {
-  front: "",
-  back: "",
+const emptyCard: QuizCardContent = {
+  front: <Typography />,
+  back: <Typography />,
 };
 
 export const generateQuizCardContent = (card: QuizCard): QuizCardContent => {

@@ -1,7 +1,13 @@
 import { shuffle } from "@/helpers/generalUtils";
 import { CheckIcon, CloseIcon } from "@/helpers/icons";
 import { generateQuizCardContent } from "@/helpers/quizUtils";
-import { CardSide, CommonDialogProps, Quiz, QuizCard } from "@/helpers/types";
+import {
+  CardSide,
+  CommonDialogProps,
+  Quiz,
+  QuizCard,
+  QuizCardContent,
+} from "@/helpers/types";
 import {
   AppBar,
   Box,
@@ -21,6 +27,7 @@ import { UUID } from "crypto";
 import React, { useEffect, useState } from "react";
 
 import utilClassInstances from "../helpers/utilClassInstances";
+import ReactCardFlip from "react-card-flip";
 const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props extends CommonDialogProps {
@@ -77,7 +84,7 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quizId }) => {
   };
 
   const content = currentCard ? (
-    generateQuizCardContent(currentCard)[viewingCardSide]
+    generateQuizCardContent(currentCard)
   ) : (
     <Box display={"flex"} alignItems={"center"}>
       <CheckIcon sx={{ fontSize: 48, mr: 2 }} color="success" />
@@ -98,9 +105,17 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quizId }) => {
       </AppBar>
 
       <DialogContent sx={{ width: ["100%", 350], minHeight: 100 }}>
-        <Card>
-          <CardContent>{content}</CardContent>
-        </Card>
+        {currentCard && content && (
+          <ReactCardFlip isFlipped={viewingCardSide === "back"}>
+            <Card key="front">
+              <CardContent>{(content as QuizCardContent).front}</CardContent>
+            </Card>
+            <Card key="back">
+              <CardContent>{(content as QuizCardContent).back}</CardContent>
+            </Card>
+          </ReactCardFlip>
+        )}
+        {!currentCard && content}
       </DialogContent>
       <DialogActions sx={{ justifyContent: "space-evenly" }}>
         {currentCard && (
@@ -112,6 +127,7 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quizId }) => {
               <>
                 <Button onClick={removeCard} color="success">
                   Got it
+                  <br />
                 </Button>
                 <Button onClick={shuffleCard} color="warning">
                   I need more practice
