@@ -20,6 +20,14 @@ export interface Conjugation {
   term: string;
 }
 
+export interface NounType {
+  EN: "en-word";
+  ETT: "ett-word";
+  UNCOUNTABLE_DEFINITE_EN: "uncountable, acts as en in definite forms";
+  UNCOUNTABLE_DEFINITE_ETT: "uncountable, acts as ett in definite forms";
+  PROPER_NOUN: "proper noun";
+}
+
 export interface Term {
   id: UUID;
   type: WordClassType;
@@ -27,6 +35,7 @@ export interface Term {
   definition: string;
   conjugations?: Conjugation[];
   notes?: string;
+  nounType?: NounType | null;
 }
 
 export interface TermList {

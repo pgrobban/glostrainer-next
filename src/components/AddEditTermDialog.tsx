@@ -30,6 +30,7 @@ import {
   WordClasses,
   WordClassType,
 } from "../helpers/types";
+import ResponsiveSelect from "./ResponsiveSelect";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -100,6 +101,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
         form: {
           mutators: { push },
         },
+        values,
       }) => (
         <Dialog
           onClose={onClose}
@@ -176,77 +178,21 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                 )}
               />
 
-              <FormControl
-                sx={{ mt: 1, display: ["inline-flex", "none"] }}
-                required
-                fullWidth
+              <Box
+                display={"flex"}
+                flexWrap={"wrap"}
+                sx={{ ["& > *"]: { flexGrow: 1, flexBasis: "50%" } }}
               >
-                <InputLabel
-                  variant="standard"
-                  htmlFor="word-class-select-native"
-                >
-                  Word class
-                </InputLabel>
-
-                <Field<WordClassType>
-                  name="type"
-                  validate={required}
-                  render={({ input, meta }) => (
-                    <NativeSelect
-                      inputProps={{
-                        id: "word-class-select-native",
-                      }}
-                      defaultValue={""}
-                      onChange={input.onChange}
-                      error={showError(meta)}
-                    >
-                      <option
-                        value={""}
-                        disabled
-                        style={{ fontStyle: "italic" }}
-                      >
-                        Select a word class
-                      </option>
-                      {WordClasses.map((wordClass) => (
-                        <option key={wordClass} value={wordClass}>
-                          {wordClass}
-                        </option>
-                      ))}
-                    </NativeSelect>
-                  )}
+                <ResponsiveSelect<WordClassType>
+                  inputLabel="Word class"
+                  label="Select a word class"
+                  inputLabelId="word-class-select"
+                  options={Array.from(WordClasses)}
+                  data-testid="term-word-class"
+                  required
+                  sx={{ mt: 1 }}
                 />
-              </FormControl>
-              <FormControl
-                sx={{ mt: 1, display: ["none", "inline-flex"] }}
-                required
-                fullWidth
-              >
-                <InputLabel id="word-class-select-label">Word class</InputLabel>
-
-                <Field<WordClassType>
-                  name="type"
-                  validate={required}
-                  render={({ input, meta }) => (
-                    <Select
-                      data-testid="term-word-class"
-                      label="Word class"
-                      labelId="word-class-select-label"
-                      value={input.value}
-                      onChange={input.onChange}
-                      error={showError(meta)}
-                    >
-                      <MenuItem value="" disabled sx={{ fontStyle: "italic" }}>
-                        Select a word class
-                      </MenuItem>
-                      {WordClasses.map((wordClass) => (
-                        <MenuItem key={wordClass} value={wordClass}>
-                          {wordClass}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </FormControl>
+              </Box>
 
               <Divider sx={{ m: 2 }} />
               <Box sx={{ display: "flex" }} justifyContent={"space-between"}>
