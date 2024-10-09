@@ -133,7 +133,7 @@ const TermList: React.FC<Props> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedTerms.map((term, index) => (
+          {sortedTerms.map((term) => (
             <TermRow
               key={term.id}
               term={term}

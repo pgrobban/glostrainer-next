@@ -91,6 +91,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
 
   return (
     <Form<TermSaveModel>
+      destroyOnUnregister
       initialValues={initialValues}
       mutators={{
         ...arrayMutators,

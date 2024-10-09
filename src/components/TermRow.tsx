@@ -1,7 +1,8 @@
 import { DeleteIcon } from "@/helpers/icons";
 import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
-import { Term } from "@/helpers/types";
-import { Button } from "@mui/material";
+import { getShortLabelFromNounType } from "@/helpers/termUtils";
+import { NounType, Term } from "@/helpers/types";
+import { Button, Typography } from "@mui/material";
 import { memo } from "react";
 
 interface Props {
@@ -20,7 +21,12 @@ const TermRow: React.FC<Props> = memo(
     >
       <StyledTableCell>{term.swedish}</StyledTableCell>
       <StyledTableCell>{term.definition}</StyledTableCell>
-      <StyledTableCell>{term.type}</StyledTableCell>
+      <StyledTableCell>
+        {term.type}
+        {term.nounType && (
+          <Typography>{getShortLabelFromNounType(term.nounType)}</Typography>
+        )}
+      </StyledTableCell>
       <StyledTableCell>{term.notes}</StyledTableCell>
       <StyledTableCell padding="none">
         <Button
