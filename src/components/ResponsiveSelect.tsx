@@ -6,22 +6,29 @@ import {
   MenuItem,
   NativeSelect,
   Select,
+  SelectChangeEvent,
   SxProps,
 } from "@mui/material";
-import { Field } from "react-final-form";
+import { ChangeEvent, useCallback } from "react";
+import { Field, FieldInputProps } from "react-final-form";
 
-interface Props<T extends string> {
+type Options = string[] | { [key: string]: string };
+
+interface Props {
+  fieldName: string;
   inputLabel: string;
   inputLabelId: string;
   label: string;
-  options: T[];
+  options: Options;
   required?: boolean;
   "data-testid"?: string;
   sx?: SxProps;
 }
 
-const ResponsiveSelect = <T extends string>(props: Props<T>) => {
-  const { inputLabel, label, required, options, inputLabelId, sx } = props;
+const ResponsiveSelect = <T extends string | object>(props: Props) => {
+  const { inputLabel, label, required, options, inputLabelId, sx, fieldName } =
+    props;
+
   return (
     <Box sx={sx}>
       <FormControl
@@ -38,7 +45,7 @@ const ResponsiveSelect = <T extends string>(props: Props<T>) => {
         </InputLabel>
 
         <Field<T>
-          name="type"
+          name={fieldName}
           validate={props.required ? requiredValidator : undefined}
           render={({ input, meta }) => (
             <NativeSelect
@@ -52,11 +59,18 @@ const ResponsiveSelect = <T extends string>(props: Props<T>) => {
               <option value={""} disabled style={{ fontStyle: "italic" }}>
                 {label}
               </option>
-              {options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
+              {Array.isArray(options) &&
+                options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              {!Array.isArray(options) &&
+                Object.keys(options).map((key) => (
+                  <option key={key} value={key}>
+                    {options[key]}
+                  </option>
+                ))}
             </NativeSelect>
           )}
         />
@@ -65,7 +79,7 @@ const ResponsiveSelect = <T extends string>(props: Props<T>) => {
         <InputLabel id={inputLabelId}>{inputLabel}</InputLabel>
 
         <Field<T>
-          name="type"
+          name={fieldName}
           validate={props.required ? requiredValidator : undefined}
           render={({ input, meta }) => (
             <Select
@@ -79,11 +93,18 @@ const ResponsiveSelect = <T extends string>(props: Props<T>) => {
               <MenuItem value="" disabled sx={{ fontStyle: "italic" }}>
                 {label}
               </MenuItem>
-              {options.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
+              {Array.isArray(options) &&
+                options.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              {!Array.isArray(options) &&
+                Object.keys(options).map((key) => (
+                  <MenuItem key={key} value={key}>
+                    {options[key]}
+                  </MenuItem>
+                ))}
             </Select>
           )}
         />

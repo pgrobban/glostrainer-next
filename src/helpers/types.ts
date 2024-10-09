@@ -20,12 +20,12 @@ export interface Conjugation {
   term: string;
 }
 
-export interface NounType {
-  EN: "en-word";
-  ETT: "ett-word";
-  UNCOUNTABLE_DEFINITE_EN: "uncountable, acts as en in definite forms";
-  UNCOUNTABLE_DEFINITE_ETT: "uncountable, acts as ett in definite forms";
-  PROPER_NOUN: "proper noun";
+export enum NounType {
+  EN = "En-word",
+  ETT = "Ett-word",
+  UNCOUNTABLE_DEFINITE_EN = "Uncountable, acts as en in definite forms",
+  UNCOUNTABLE_DEFINITE_ETT = "Uncountable, acts as ett in definite forms",
+  PROPER_NOUN = "Proper noun",
 }
 
 export interface Term {

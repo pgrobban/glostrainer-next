@@ -5,12 +5,8 @@ import {
   Button,
   Dialog,
   Divider,
-  FormControl,
+  Grid2 as Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  NativeSelect,
-  Select,
   TextField,
   Toolbar,
   Typography,
@@ -26,6 +22,7 @@ import utilClassInstances from "../../src/helpers/utilClassInstances";
 import {
   CommonDialogProps,
   Conjugation,
+  NounType,
   Term,
   WordClasses,
   WordClassType,
@@ -74,6 +71,10 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const onSubmit = (values: TermSaveModel) => {
+    if (values.type !== "Noun") {
+      delete values.nounType;
+    }
+
     onSave(values);
   };
 
@@ -90,7 +91,6 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
 
   return (
     <Form<TermSaveModel>
-      key={initialValues.swedish}
       initialValues={initialValues}
       mutators={{
         ...arrayMutators,
@@ -178,21 +178,37 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                 )}
               />
 
-              <Box
-                display={"flex"}
-                flexWrap={"wrap"}
-                sx={{ ["& > *"]: { flexGrow: 1, flexBasis: "50%" } }}
-              >
-                <ResponsiveSelect<WordClassType>
-                  inputLabel="Word class"
-                  label="Select a word class"
-                  inputLabelId="word-class-select"
-                  options={Array.from(WordClasses)}
-                  data-testid="term-word-class"
-                  required
-                  sx={{ mt: 1 }}
-                />
-              </Box>
+              <Grid mt={1} container spacing={2} direction={["column", "row"]}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Box>
+                    <ResponsiveSelect<WordClassType>
+                      fieldName="type"
+                      inputLabel="Word class"
+                      label="Select a word class"
+                      inputLabelId="word-class-select"
+                      options={Array.from(WordClasses)}
+                      data-testid="term-word-class"
+                      required
+                    />
+                  </Box>
+                </Grid>
+
+                {values.type === "Noun" && (
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Box>
+                      <ResponsiveSelect<NounType>
+                        fieldName="nounType"
+                        inputLabel="Noun type"
+                        label="Select a noun type"
+                        inputLabelId="word-class-select"
+                        options={NounType}
+                        data-testid="term-word-class"
+                        required
+                      />
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
 
               <Divider sx={{ m: 2 }} />
               <Box sx={{ display: "flex" }} justifyContent={"space-between"}>

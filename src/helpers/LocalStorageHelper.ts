@@ -10,6 +10,7 @@ import {
   TermList,
 } from "./types";
 import { QuizSaveModel } from "@/components/AddEditQuizDialog";
+import { TermSaveModel } from "@/components/AddEditTermDialog";
 
 const defaultProfile = {
   activeTermListId: null,
@@ -65,6 +66,26 @@ export default class LocalStorageHelper {
 
   getCachedQuizzes() {
     return this.cachedProfile.quizzes || [];
+  }
+
+  addTerm(termSaveModel: TermSaveModel) {
+    const termList = this.getActiveTermList();
+    if (!termList) {
+      return;
+    }
+    termList.terms.push({ id: uuid() as UUID, ...termSaveModel });
+    this.saveData();
+  }
+
+  updateTerm(termId: UUID, termSaveModel: TermSaveModel) {
+    const termList = this.getActiveTermList();
+    if (!termList) {
+      return;
+    }
+
+    const termIndex = termList.terms.findIndex((term) => term.id === termId);
+    termList.terms.splice(termIndex, 1, { id: termId, ...termSaveModel });
+    this.saveData();
   }
 
   setActiveTermList(id: UUID | null) {

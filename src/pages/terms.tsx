@@ -71,19 +71,11 @@ const TermListPage: React.FC = () => {
   }, [searchTerm]);
 
   const onSaveTerm = (termSaveModel: TermSaveModel) => {
-    const terms = localStorageHelperInstance.getActiveTermList()?.terms || [];
-    const newTerms = [...terms];
-    const termToSave = Object.assign({}, termSaveModel, {
-      id: editingTermId,
-    }) as Term;
-
     if (editingTermId) {
-      const termIndex = terms.findIndex((term) => term.id === editingTermId);
-      newTerms.splice(termIndex, 1, termToSave);
+      localStorageHelperInstance.updateTerm(editingTermId, termSaveModel);
     } else {
-      newTerms.push(termToSave);
+      localStorageHelperInstance.addTerm(termSaveModel);
     }
-    saveLocalData(newTerms);
     setAddEditTermDialogOpen(false);
     setTimeout(() => setEditingTermId(null), 500); // don't show the title change too quickly
   };
@@ -119,17 +111,6 @@ const TermListPage: React.FC = () => {
   const saveLocalData = (newTerms: Term[]) => {
     localStorageHelperInstance.updateActiveTermList(newTerms);
     setCachedTermLists([...localStorageHelperInstance.getCachedTermLists()]);
-  };
-
-  const onTermListSaved = (newTermList: TermListType) => {
-    if (editingTermListId) {
-    } else {
-      setSearchTerm("");
-      localStorageHelperInstance.setActiveTermList(newTermList.id);
-      setExpandedTermLists([newTermList.id]);
-    }
-    setAddEditTermListDialogOpen(false);
-    setTimeout(() => setEditingTermListId(null), 500);
   };
 
   const onTermListDeleted = () => {
