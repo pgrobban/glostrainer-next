@@ -141,7 +141,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
           </AppBar>
 
           <Box component="form" noValidate autoComplete="off">
-            <Box sx={{ m: 3, "& .MuiTextField-root": { mt: 1, mb: 1 } }}>
+            <Box sx={{ m: 2, "& .MuiTextField-root": { mt: 1, mb: 1 } }}>
               <Typography sx={{ mb: 1 }} variant="h6">
                 Base info
               </Typography>
@@ -212,9 +212,77 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
               </Grid>
 
               <Divider sx={{ m: 2 }} />
-              <Box sx={{ display: "flex" }} justifyContent={"space-between"}>
+              <Box>
                 <Typography variant="h6">Conjugations</Typography>
+              </Box>
 
+              <FieldArray<Conjugation> name="conjugations">
+                {({ fields }) =>
+                  fields.map((name, index) => (
+                    <Grid
+                      border={["1px solid #777", "none"]}
+                      borderRadius={3}
+                      p={[1, 0]}
+                      key={name}
+                      container
+                      alignItems={"center"}
+                      columns={[13]}
+                    >
+                      <Grid
+                        size={[12]}
+                        container
+                        spacing={[0, 2]}
+                        direction={["column", "row"]}
+                        columns={[12]}
+                      >
+                        <Grid size={[12, 6]}>
+                          <Field
+                            name={`${name}.form`}
+                            validate={required}
+                            render={({ input, meta }) => (
+                              <TextField
+                                required
+                                label="Form"
+                                fullWidth
+                                value={input.value}
+                                onChange={input.onChange}
+                                error={showError(meta)}
+                              />
+                            )}
+                          />
+                        </Grid>
+
+                        <Grid size={[12, 6]}>
+                          <Field
+                            name={`${name}.term`}
+                            validate={required}
+                            render={({ input, meta }) => (
+                              <TextField
+                                required
+                                label="Term"
+                                fullWidth
+                                value={input.value}
+                                onChange={input.onChange}
+                                error={showError(meta)}
+                              />
+                            )}
+                          />
+                        </Grid>
+                      </Grid>
+                      <Grid size={[1]} container justifyContent={"center"}>
+                        <IconButton
+                          color="secondary"
+                          onClick={() => fields.remove(index)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  ))
+                }
+              </FieldArray>
+
+              <Box mt={1}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -224,49 +292,6 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                   Add conjugation
                 </Button>
               </Box>
-
-              <FieldArray<Conjugation> name="conjugations">
-                {({ fields }) =>
-                  fields.map((name, index) => (
-                    <Box key={name} sx={{ display: "flex" }}>
-                      <Field
-                        name={`${name}.form`}
-                        validate={required}
-                        render={({ input, meta }) => (
-                          <TextField
-                            required
-                            label="Form"
-                            fullWidth
-                            value={input.value}
-                            onChange={input.onChange}
-                            error={showError(meta)}
-                          />
-                        )}
-                      />
-                      <Field
-                        name={`${name}.term`}
-                        validate={required}
-                        render={({ input, meta }) => (
-                          <TextField
-                            required
-                            label="Term"
-                            fullWidth
-                            value={input.value}
-                            onChange={input.onChange}
-                            error={showError(meta)}
-                          />
-                        )}
-                      />
-                      <IconButton
-                        color="secondary"
-                        onClick={() => fields.remove(index)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  ))
-                }
-              </FieldArray>
 
               <Divider sx={{ m: 2 }} />
 
