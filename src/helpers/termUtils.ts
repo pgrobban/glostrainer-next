@@ -25,15 +25,15 @@ export const getAbbreviatedTermType = (type: WordClassType) => {
   }
 };
 
-export const getShortLabelFromNounType = (nounType: keyof typeof NounType) => {
+export const getShortLabelFromNounType = (nounType: NounType) => {
   switch (nounType) {
-    case "EN":
+    case NounType.EN:
       return "en";
-    case "ETT":
+    case NounType.ETT:
       return "ett";
-    case "UNCOUNTABLE_DEFINITE_EN":
+    case NounType.UNCOUNTABLE_DEFINITE_EN:
       return "unc. (en)";
-    case "UNCOUNTABLE_DEFINITE_ETT":
+    case NounType.UNCOUNTABLE_DEFINITE_ETT:
       return "unc. (ett)";
     default:
       return "";

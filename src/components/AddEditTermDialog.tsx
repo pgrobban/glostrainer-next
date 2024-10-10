@@ -141,7 +141,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
           </AppBar>
 
           <Box component="form" noValidate autoComplete="off">
-            <Box sx={{ m: 2, "& .MuiTextField-root": { mt: 1, mb: 1 } }}>
+            <Box sx={{ m: [3, 2], "& .MuiTextField-root": { mt: 1, mb: 1 } }}>
               <Typography sx={{ mb: 1 }} variant="h6">
                 Base info
               </Typography>

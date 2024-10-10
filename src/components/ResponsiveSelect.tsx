@@ -67,7 +67,7 @@ const ResponsiveSelect = <T extends string | object>(props: Props) => {
                 ))}
               {!Array.isArray(options) &&
                 Object.keys(options).map((key) => (
-                  <option key={key} value={key}>
+                  <option key={key} value={options[key]}>
                     {options[key]}
                   </option>
                 ))}
@@ -101,7 +101,7 @@ const ResponsiveSelect = <T extends string | object>(props: Props) => {
                 ))}
               {!Array.isArray(options) &&
                 Object.keys(options).map((key) => (
-                  <MenuItem key={key} value={key}>
+                  <MenuItem key={key} value={options[key]}>
                     {options[key]}
                   </MenuItem>
                 ))}
