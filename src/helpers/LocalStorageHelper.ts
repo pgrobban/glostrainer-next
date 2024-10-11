@@ -131,6 +131,11 @@ export default class LocalStorageHelper {
     this.saveData();
   }
 
+  overwriteQuizzes(quizzes: Quiz[]) {
+    this.cachedProfile.quizzes = JSON.parse(JSON.stringify(quizzes));
+    this.saveData();
+  }
+
   saveData() {
     this.cachedProfile.lastSave = new Date();
     localStorage.setItem(

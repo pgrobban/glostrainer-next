@@ -1,5 +1,5 @@
 import utilClassInstances from "../helpers/utilClassInstances";
-import { ImportStrategy, Term, TermList } from "./types";
+import { ImportStrategy, Profile, Term, TermList } from "./types";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -17,11 +17,13 @@ const exportBlob = (blob: Blob, fileName: string) => {
 
 export const exportJson = () => {
   const termLists = localStorageHelperInstance.getCachedTermLists();
-  const stringifiedLists = JSON.stringify(termLists);
+  const quizzes = localStorageHelperInstance.getCachedQuizzes();
+
+  const stringifiedLists = JSON.stringify({ termLists, quizzes });
   const blob = new Blob([stringifiedLists], {
     type: "application/json; charset=utf-8",
   });
-  exportBlob(blob, "lists.json");
+  exportBlob(blob, "data.json");
 };
 
 export const exportCsv = () => {
@@ -48,7 +50,6 @@ export const exportCsv = () => {
 export const exportXlsx = () => {
   const termLists = localStorageHelperInstance.getCachedTermLists();
   const workbook = XLSX.utils.book_new();
-  const fields: (keyof Term)[] = ["swedish", "definition", "type", "notes"];
 
   termLists.forEach((termList) => {
     const modifiedTerms = termList.terms.map((term) => ({
@@ -103,21 +104,23 @@ export const exportPdf = async () => {
   doc.save("lists.pdf");
 };
 
-export const tryGetTermListsFromFile = (inputFile: File) => {
-  return new Promise<TermList[]>(async (resolve, reject) => {
-    const fileReader = new FileReader();
-    fileReader.readAsText(inputFile, "utf-8");
-    fileReader.onloadend = () => {
-      const result = fileReader.result;
-      if (typeof result !== "string") {
-        return reject();
-      }
+export const tryGetDataFromFile = (inputFile: File) => {
+  return new Promise<Pick<Profile, "termLists" | "quizzes">>(
+    async (resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsText(inputFile, "utf-8");
+      fileReader.onloadend = () => {
+        const result = fileReader.result;
+        if (typeof result !== "string") {
+          return reject();
+        }
 
-      const parsed = JSON.parse(result);
-      // TODO: validate data
-      return resolve(parsed);
-    };
-  });
+        const parsed = JSON.parse(result);
+        // TODO: validate data
+        return resolve(parsed);
+      };
+    }
+  );
 };
 
 const mergeLists = (termListsFromImport: TermList[], overwrite: boolean) => {
@@ -158,7 +161,7 @@ const mergeLists = (termListsFromImport: TermList[], overwrite: boolean) => {
   return result;
 };
 
-export const importData = (
+export const getTermListsFromImport = (
   termListsFromImport: TermList[],
   importStrategy: ImportStrategy
 ): TermList[] => {

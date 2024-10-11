@@ -17,12 +17,12 @@ import {
 } from "@mui/material";
 import { useRef, useState } from "react";
 import {
-  importData,
-  tryGetTermListsFromFile,
+  getTermListsFromImport,
+  tryGetDataFromFile,
 } from "../helpers/importExportDataHelper";
-import InvalidFileAlert from "./InvalidFileAlert";
-import ImportSuccessDialog from "./ImportSuccessDialog";
 import utilClassInstances from "../helpers/utilClassInstances";
+import ImportSuccessDialog from "./ImportSuccessDialog";
+import InvalidFileAlert from "./InvalidFileAlert";
 const { localStorageHelperInstance } = utilClassInstances;
 
 const ImportDataDialog = ({ open, onClose }: CommonDialogProps) => {
@@ -49,9 +49,13 @@ const ImportDataDialog = ({ open, onClose }: CommonDialogProps) => {
 
   const tryImportData = async (file: File) => {
     try {
-      const parsedTermLists = await tryGetTermListsFromFile(file);
-      importData(parsedTermLists, importStrategy);
-      localStorageHelperInstance.overwriteTermLists(parsedTermLists);
+      const parsedData = await tryGetDataFromFile(file);
+      const termListsFromImport = getTermListsFromImport(
+        parsedData.termLists,
+        importStrategy
+      );
+      localStorageHelperInstance.overwriteTermLists(termListsFromImport);
+      localStorageHelperInstance.overwriteQuizzes(parsedData.quizzes);
       setImportSuccessDialogOpen(true);
     } catch {
       setInvalidFileAlertOpen(true);

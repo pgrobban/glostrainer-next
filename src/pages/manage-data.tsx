@@ -30,24 +30,24 @@ const ManageDataPage: React.FC = () => {
           Export data
         </Typography>
 
-        <Box sx={{ "& > *": { marginRight: 3 } }}>
-          <Button
-            variant="outlined"
-            onClick={importExportDataHelper.exportXlsx}
-          >
-            Export XLSX
-          </Button>
-          <Button variant="outlined" onClick={importExportDataHelper.exportPdf}>
-            Export PDF
-          </Button>
+        <Box sx={{ "& > *": { display: "block" } }}>
           <Button
             variant="outlined"
             onClick={importExportDataHelper.exportJson}
           >
-            Export JSON
+            Export as JSON (term lists + quizzes)
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={importExportDataHelper.exportXlsx}
+          >
+            Export as XLSX (term lists only)
+          </Button>
+          <Button variant="outlined" onClick={importExportDataHelper.exportPdf}>
+            Export as PDF (term lists only)
           </Button>
           <Button variant="outlined" onClick={importExportDataHelper.exportCsv}>
-            Export CSV
+            Export as CSV (term lists only)
           </Button>
         </Box>
 
@@ -60,7 +60,7 @@ const ManageDataPage: React.FC = () => {
             variant="outlined"
             onClick={() => setImportDataDialogOpen(true)}
           >
-            Import JSON
+            Import from JSON (term lists + quizzes)
           </Button>
         </Box>
 
