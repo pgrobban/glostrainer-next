@@ -132,8 +132,6 @@ const TermListPage: React.FC = () => {
     }
   };
 
-  const activeTermListName =
-    localStorageHelperInstance.getActiveTermList()?.name;
   return (
     <>
       <ResponsiveAppBar />
@@ -185,11 +183,11 @@ const TermListPage: React.FC = () => {
                 </StyledTableHeadRow>
                 {cachedTermLists.length > 0 && (
                   <TableRow>
-                    <TableCell>{/* expand button */}</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Terms</TableCell>
-                    <TableCell>Last update</TableCell>
-                    <TableCell>{/* delete button */}</TableCell>
+                    <TableCell width={100}>{/* expand button */}</TableCell>
+                    <TableCell width={200}>Name</TableCell>
+                    <TableCell width={100}>Terms</TableCell>
+                    <TableCell width={300}>Last update</TableCell>
+                    <TableCell width={100}>{/* delete button */}</TableCell>
                   </TableRow>
                 )}
               </TableHead>

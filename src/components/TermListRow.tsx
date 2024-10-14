@@ -66,7 +66,7 @@ const TermListRow = memo((props: Props) => {
             ? getLocalDateTime(updatedOn)
             : getLocalDateTime(createdOn)}
         </TableCell>
-        <TableCell>
+        <TableCell align="right">
           <Button
             color="secondary"
             variant="outlined"
@@ -80,7 +80,7 @@ const TermListRow = memo((props: Props) => {
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell sx={{ pt: 0, pb: 0, pl: [1, 2], pr: [1, 2] }} colSpan={6}>
           <Collapse in={expanded} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <TermList

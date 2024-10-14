@@ -9,9 +9,10 @@ const roboto = Roboto({
   subsets: ["latin"],
 });
 
-const theme = createTheme({
+let theme = createTheme({
   typography: {
     fontFamily: roboto.style.fontFamily,
+    fontSize: 16,
   },
   palette: {
     mode: "dark",

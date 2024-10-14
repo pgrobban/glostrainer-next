@@ -2,7 +2,7 @@ import { DeleteIcon } from "@/helpers/icons";
 import { StyledTableCell, StyledTableRow } from "@/helpers/styleUtils";
 import { getShortLabelFromNounType } from "@/helpers/termUtils";
 import { NounType, Term } from "@/helpers/types";
-import { Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { memo } from "react";
 
 interface Props {
@@ -28,17 +28,19 @@ const TermRow: React.FC<Props> = memo(
         )}
       </StyledTableCell>
       <StyledTableCell>{term.notes}</StyledTableCell>
-      <StyledTableCell padding="none">
-        <Button
-          color="secondary"
-          variant="outlined"
-          onClick={(evt) => {
-            evt.stopPropagation();
-            onClickDelete();
-          }}
-        >
-          <DeleteIcon />
-        </Button>
+      <StyledTableCell sx={{ p: 1 }} align="right">
+        <Box mr={1}>
+          <Button
+            color="secondary"
+            variant="outlined"
+            onClick={(evt) => {
+              evt.stopPropagation();
+              onClickDelete();
+            }}
+          >
+            <DeleteIcon />
+          </Button>
+        </Box>
       </StyledTableCell>
     </StyledTableRow>
   )

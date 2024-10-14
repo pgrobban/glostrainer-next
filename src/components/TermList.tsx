@@ -107,7 +107,11 @@ const TermList: React.FC<Props> = ({
             )}
             {!isEmpty &&
               headCells.map((headCell) => (
-                <StyledTableCell key={headCell.id} sx={{ fontWeight: 600 }}>
+                <StyledTableCell
+                  width={150}
+                  key={headCell.id}
+                  sx={{ fontWeight: 600 }}
+                >
                   <TableSortLabel
                     active={orderBy === headCell.id}
                     direction={orderBy === headCell.id ? order : "asc"}
@@ -125,7 +129,9 @@ const TermList: React.FC<Props> = ({
                 </StyledTableCell>
               ))}
             {!isEmpty && (
-              <StyledTableCell sx={{ fontWeight: 600 }}>Notes</StyledTableCell>
+              <StyledTableCell width={250} sx={{ fontWeight: 600 }}>
+                Notes
+              </StyledTableCell>
             )}
             {!isEmpty && (
               <StyledTableCell width={100}>{/* actions */}</StyledTableCell>
