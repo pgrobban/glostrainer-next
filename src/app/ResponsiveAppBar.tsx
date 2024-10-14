@@ -41,11 +41,11 @@ const ResponsiveAppBar = () => {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseNavMenu = () => {
+  const closeNavMenu = () => {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const closeUserMenu = () => {
     setAnchorElUser(null);
   };
 
@@ -101,13 +101,19 @@ const ResponsiveAppBar = () => {
                   horizontal: "left",
                 }}
                 open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
+                onClose={closeNavMenu}
                 sx={{
                   display: { xs: "block", md: "none" },
                 }}
               >
-                {pages.map((page) => (
-                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                {pages.map((page, index) => (
+                  <MenuItem
+                    key={page}
+                    onClick={() => {
+                      closeNavMenu();
+                      router.push(pagePaths[index]);
+                    }}
+                  >
                     <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
@@ -139,7 +145,7 @@ const ResponsiveAppBar = () => {
                 <Button
                   key={page}
                   onClick={() => {
-                    handleCloseNavMenu();
+                    closeUserMenu();
                     router.push(pagePaths[index]);
                   }}
                   sx={{ my: 2, color: "white", display: "block" }}
@@ -175,10 +181,10 @@ const ResponsiveAppBar = () => {
                   horizontal: "right",
                 }}
                 open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
+                onClose={closeUserMenu}
               >
                 {settings.map((setting) => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <MenuItem key={setting} onClick={closeUserMenu}>
                     <Typography textAlign="center">{setting}</Typography>
                   </MenuItem>
                 ))}
