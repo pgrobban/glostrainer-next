@@ -1,5 +1,6 @@
 import { required, showError } from "@/helpers/formUtils";
 import { CloseIcon } from "@/helpers/icons";
+import { getCardCount, getTermCount } from "@/helpers/quizUtils";
 import {
   CommonDialogProps,
   ContentToGenerate,
@@ -32,10 +33,9 @@ import { UUID } from "crypto";
 import { useCallback, useEffect, useState } from "react";
 import { Field, Form } from "react-final-form";
 import utilClassInstances from "../helpers/utilClassInstances";
+import GenerateCardContentSelector from "./GeneratedCardContentSelector";
 import QuizBuilderTable from "./QuizBuilderTable";
 import SwedishDefinitionLabel from "./SwedishDefinitionLabel";
-import GenerateCardContentSelector from "./GeneratedCardContentSelector";
-import { getCardCount, getTermCount } from "@/helpers/quizUtils";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const MINIMUM_QUIZ_NAME_LENGTH = 3;
@@ -287,14 +287,7 @@ const AddEditQuizDialog: React.FC<Props> = ({
           });
         },
       }}
-      render={({
-        handleSubmit,
-        submitting,
-        errors,
-        values,
-        pristine,
-        form,
-      }) => (
+      render={({ handleSubmit, form }) => (
         <form onSubmit={handleSubmit} autoComplete="off">
           <Dialog
             fullScreen={fullScreen}

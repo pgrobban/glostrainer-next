@@ -1,6 +1,8 @@
 import { FieldMetaState } from "react-final-form";
 
-export const showError = <FieldValue>(meta: FieldMetaState<FieldValue>) =>
+export const showError = <FieldValue>(
+  meta: FieldMetaState<FieldValue>
+): boolean =>
   meta.submitFailed &&
   !meta.modifiedSinceLastSubmit &&
   (meta.error || meta.submitError);

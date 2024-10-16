@@ -1,4 +1,4 @@
-import { AddIcon, CloseIcon, DeleteIcon } from "@/helpers/icons";
+import { AddIcon, CloseIcon } from "@/helpers/icons";
 import {
   AppBar,
   Box,
@@ -17,17 +17,17 @@ import { UUID } from "crypto";
 import arrayMutators from "final-form-arrays";
 import { useEffect, useState } from "react";
 import { Field, Form } from "react-final-form";
-import { FieldArray } from "react-final-form-arrays";
 import utilClassInstances from "../../src/helpers/utilClassInstances";
 import {
   CommonDialogProps,
-  Conjugation,
   NounType,
   Term,
   WordClasses,
   WordClassType,
 } from "../helpers/types";
 import ResponsiveSelect from "./ResponsiveSelect";
+import ConjugationsFields from "./ConjugationsFields";
+import ConfirmChangeWordClassDialog from "./ConfirmChangeWordClassDialog";
 
 const { localStorageHelperInstance } = utilClassInstances;
 
@@ -49,6 +49,10 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
   const [initialValues, setInitialValues] = useState<TermSaveModel>({
     ...defaultTermSaveModel,
   });
+  const [confirmWordClassChangeDialog, setConfirmWordClassChangeDialogOpen] =
+    useState(false);
+  const [wordClassToChange, setWordClassToChange] =
+    useState<WordClassType | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -95,12 +99,16 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
       initialValues={initialValues}
       mutators={{
         ...arrayMutators,
+        changeWordClassType: (args, state, utils) => {
+          utils.changeValue(state, "type", () => wordClassToChange);
+          utils.changeValue(state, "conjugations", () => []);
+        },
       }}
       onSubmit={onSubmit}
       render={({
         handleSubmit,
         form: {
-          mutators: { push },
+          mutators: { push, changeWordClassType },
         },
         values,
       }) => (
@@ -152,7 +160,7 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                 render={({ input, meta }) => (
                   <TextField
                     required
-                    label="Swedish"
+                    label="Swedish (dictionary form)"
                     fullWidth
                     value={input.value}
                     onChange={input.onChange}
@@ -188,6 +196,11 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                       label="Select a word class"
                       inputLabelId="word-class-select"
                       options={Array.from(WordClasses)}
+                      onChange={(newValue) => {
+                        // @ts-expect-error
+                        setWordClassToChange(newValue);
+                        setConfirmWordClassChangeDialogOpen(true);
+                      }}
                       data-testid="term-word-class"
                       required
                     />
@@ -214,73 +227,17 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
               <Divider sx={{ m: 2 }} />
               <Box>
                 <Typography variant="h6">Conjugations</Typography>
+                {values.type === "Adjective" && (
+                  <Typography fontSize={12}>
+                    Note: For adjectives, the dictionary form is the same as the{" "}
+                    <i>en</i>- form, so you don&apos;t need to add it here.
+                  </Typography>
+                )}
               </Box>
 
-              <FieldArray<Conjugation> name="conjugations">
-                {({ fields }) =>
-                  fields.map((name, index) => (
-                    <Grid
-                      border={["1px solid #777", "none"]}
-                      borderRadius={3}
-                      p={[1, 0]}
-                      key={name}
-                      container
-                      alignItems={"center"}
-                      columns={[13]}
-                    >
-                      <Grid
-                        size={[12]}
-                        container
-                        spacing={[0, 2]}
-                        direction={["column", "row"]}
-                        columns={[12]}
-                      >
-                        <Grid size={[12, 6]}>
-                          <Field
-                            name={`${name}.form`}
-                            validate={required}
-                            render={({ input, meta }) => (
-                              <TextField
-                                required
-                                label="Form"
-                                fullWidth
-                                value={input.value}
-                                onChange={input.onChange}
-                                error={showError(meta)}
-                              />
-                            )}
-                          />
-                        </Grid>
-
-                        <Grid size={[12, 6]}>
-                          <Field
-                            name={`${name}.term`}
-                            validate={required}
-                            render={({ input, meta }) => (
-                              <TextField
-                                required
-                                label="Term"
-                                fullWidth
-                                value={input.value}
-                                onChange={input.onChange}
-                                error={showError(meta)}
-                              />
-                            )}
-                          />
-                        </Grid>
-                      </Grid>
-                      <Grid size={[1]} container justifyContent={"center"}>
-                        <IconButton
-                          color="secondary"
-                          onClick={() => fields.remove(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
-                  ))
-                }
-              </FieldArray>
+              <Box mt={1}>
+                <ConjugationsFields wordClass={values.type} />
+              </Box>
 
               <Box mt={1}>
                 <Button
@@ -314,6 +271,15 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
               />
             </Box>
           </Box>
+
+          <ConfirmChangeWordClassDialog
+            open={confirmWordClassChangeDialog}
+            onClose={() => setConfirmWordClassChangeDialogOpen(false)}
+            onConfirm={() => {
+              changeWordClassType();
+              setConfirmWordClassChangeDialogOpen(false);
+            }}
+          />
         </Dialog>
       )}
     />

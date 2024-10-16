@@ -25,7 +25,12 @@ export const getAbbreviatedTermType = (type: WordClassType) => {
   }
 };
 
-export const getShortLabelFromNounType = (nounType: NounType) => {
+export const getShortLabelFromNounType = (nounTypeKey: string) => {
+  const nounType = NounType[nounTypeKey as keyof typeof NounType];
+  if (!nounType) {
+    return "";
+  }
+
   switch (nounType) {
     case NounType.EN:
       return "en";
@@ -37,5 +42,52 @@ export const getShortLabelFromNounType = (nounType: NounType) => {
       return "unc. (ett)";
     default:
       return "";
+  }
+};
+
+export const getConjugationOptionsForWordClass = (
+  wordClass: WordClassType
+): { [key: string]: string } => {
+  const other = { other: "Other/I don't know" };
+
+  switch (wordClass) {
+    case "Noun":
+      return {
+        indefiniteSingular: "Indefinite singular",
+        indefinitePlural: "Indefinite plural",
+        definiteSingular: "Definite singular",
+        definitePlural: "Definite plural",
+        indefiniteSingularGenitive: "Indefinite singular genitive",
+        indefinitePluralGenitive: "Indefinite plural genitive",
+        ...other,
+      };
+    case "Verb":
+      return {
+        presentTense: "Present tense",
+        pastTense: "Past tense",
+        supine: "Supine (har/hade)",
+        imperative: "Imperative",
+        presentTensePassive: "Present tense passive",
+        pastTensePassive: "Past tense passive",
+        supinePassive: "Passive",
+        presentTenseParticiple: "Present participle",
+        perfectParticipleEn: "Perfect participle (en~)",
+        perfectParticipleEtt: "Perfect participle (ett~)",
+        denDetDeParticiple: "Perfect participle (den/det/de~)",
+        ...other,
+      };
+    case "Adjective":
+      return {
+        ett: "ett ~",
+        denDetDe: "den/det/de + positive",
+        denMasculine: "den <masculine noun>",
+        comparative: "Comparative",
+        superlative: "Superlative",
+        denDetDeSuperlative: "den/det/de + superlative",
+        superlativeMasculine: "den <masculine noun> + superlative",
+        ...other,
+      };
+    default:
+      return { ...other };
   }
 };
