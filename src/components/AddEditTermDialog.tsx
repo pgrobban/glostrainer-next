@@ -196,10 +196,15 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
                       label="Select a word class"
                       inputLabelId="word-class-select"
                       options={Array.from(WordClasses)}
-                      onChange={(newValue) => {
+                      onChange={async (newValue) => {
                         // @ts-expect-error
                         setWordClassToChange(newValue);
-                        setConfirmWordClassChangeDialogOpen(true);
+                        if (!values.conjugations?.length) {
+                          await setTimeout(() => Promise.resolve(100));
+                          changeWordClassType();
+                        } else {
+                          setConfirmWordClassChangeDialogOpen(true);
+                        }
                       }}
                       data-testid="term-word-class"
                       required
