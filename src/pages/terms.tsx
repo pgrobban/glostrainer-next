@@ -245,14 +245,20 @@ const TermListPage: React.FC = () => {
           setEditingTermListId(null);
         }}
         onSave={({ name }) => {
+          let newTermListId;
           if (editingTermListId) {
             localStorageHelperInstance.renameTermList(editingTermListId, name);
           } else {
-            localStorageHelperInstance.createNewTermList(name);
+            const newTermList =
+              localStorageHelperInstance.createNewTermList(name);
+            newTermListId = newTermList.id;
           }
           localStorageHelperInstance.saveData();
           setSearchTerm("");
           setAddEditTermListDialogOpen(false);
+          if (newTermListId) {
+            setExpandedTermLists([newTermListId]);
+          }
           setTimeout(() => setEditingTermListId(null), 500);
         }}
         editingTermListId={editingTermListId}

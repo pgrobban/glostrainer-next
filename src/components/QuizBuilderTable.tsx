@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { UUID } from "crypto";
-import React from "react";
+import React, { useEffect } from "react";
 import QuizBuilderTableRow from "./QuizBuilderTableRow";
 import {
   DragDropContext,
@@ -15,6 +15,9 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
+import utilClassInstances from "../helpers/utilClassInstances";
+import { getGeneratedCardForTerm } from "@/helpers/quizUtils";
+const { localStorageHelperInstance } = utilClassInstances;
 
 interface Props {
   onRemoveCard: (cardId: UUID) => void;
@@ -33,6 +36,26 @@ const QuizBuilderTable: React.FC<Props> = ({
     const cardId = e.draggableId as UUID;
     moveCard(cardId, e.destination.index);
   };
+
+  useEffect(() => {
+    // remove cards whose contents cannot be generated
+    for (let card of cards) {
+      const termList = localStorageHelperInstance.getTermListById(
+        card.termListId
+      );
+      const term = termList?.terms.find((term) => term.id === card.termId);
+      if (!term || !card.contentToGenerate) {
+        continue;
+      }
+      const generatedContent = getGeneratedCardForTerm(
+        term,
+        card.contentToGenerate
+      );
+      if (!generatedContent.back || !generatedContent.front) {
+        onRemoveCard(card.id);
+      }
+    }
+  }, [cards]);
 
   return (
     <Table stickyHeader size="small">

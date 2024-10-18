@@ -75,6 +75,7 @@ const AddEditTermListDialog: React.FC<Props> = ({
     <Form
       key={initialValues.name}
       initialValues={initialValues}
+      destroyOnUnregister
       onSubmit={onSubmit}
       validate={validate}
       render={({ handleSubmit, form }) => (

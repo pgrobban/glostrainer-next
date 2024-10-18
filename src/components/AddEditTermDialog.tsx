@@ -232,6 +232,13 @@ const AddEditTermDialog: React.FC<Props> = (props) => {
               <Divider sx={{ m: 2 }} />
               <Box>
                 <Typography variant="h6">Conjugations</Typography>
+                {values.type === "Noun" && (
+                  <Typography fontSize={12}>
+                    Note: For nouns, the dictionary form is the same as the{" "}
+                    singular indefinite form, so you don&apos;t need to add it
+                    here.
+                  </Typography>
+                )}
                 {values.type === "Adjective" && (
                   <Typography fontSize={12}>
                     Note: For adjectives, the dictionary form is the same as the{" "}

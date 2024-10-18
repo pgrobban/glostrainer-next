@@ -1,4 +1,4 @@
-import { NounType, WordClassType } from "./types";
+import { NounType, Term, WordClassType } from "./types";
 
 export const getAbbreviatedTermType = (type: WordClassType) => {
   switch (type) {
@@ -53,7 +53,6 @@ export const getConjugationOptionsForWordClass = (
   switch (wordClass) {
     case "Noun":
       return {
-        indefiniteSingular: "Indefinite singular",
         indefinitePlural: "Indefinite plural",
         definiteSingular: "Definite singular",
         definitePlural: "Definite plural",
@@ -91,3 +90,6 @@ export const getConjugationOptionsForWordClass = (
       return { ...other };
   }
 };
+
+export const getConjugationByForm = (term: Term, conjugationForm: string) =>
+  term.conjugations?.find((conj) => conj.form === conjugationForm)?.term || "";

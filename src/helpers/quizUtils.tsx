@@ -1,13 +1,13 @@
-import {
-  QuizCardContentTemplateData,
-  ContentToGenerate,
-  QuizCard,
-  Term,
-  QuizCardContent,
-} from "./types";
 import { Typography } from "@mui/material";
 import utilClassInstances from "../helpers/utilClassInstances";
-import { ReactNode } from "react";
+import {
+  ContentToGenerate,
+  QuizCard,
+  QuizCardContent,
+  QuizCardContentTemplateData,
+  Term,
+} from "./types";
+import { getConjugationByForm } from "./termUtils";
 const { localStorageHelperInstance } = utilClassInstances;
 
 export const getReadableContentToGenerateLabel = (
@@ -16,7 +16,9 @@ export const getReadableContentToGenerateLabel = (
   return content
     .replace("_to_", " → ")
     .replaceAll("_", " ")
-    .replaceAll("swedish", "Swedish");
+    .replaceAll(" form", "-form")
+    .replaceAll("swedish", "Swedish")
+    .replaceAll("den det de", "den/det/de");
 };
 
 export const getGeneratedCardForTerm = (
@@ -33,6 +35,51 @@ export const getGeneratedCardForTerm = (
       return {
         front: term.definition,
         back: term.swedish,
+      };
+    case "singular_indefinite_to_singular_definite":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "definiteSingular"),
+      };
+    case "singular_indefinite_to_plural_indefinite":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "indefinitePlural"),
+      };
+    case "singular_indefinite_to_plural_definite":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "definitePlural"),
+      };
+    case "dictionary_form_to_imperative":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "imperative"),
+      };
+    case "dictionary_form_to_past_tense":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "pastTense"),
+      };
+    case "en_form_to_den_det_de_form":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "denDetDe"),
+      };
+    case "en_form_to_ett_form":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "ett"),
+      };
+    case "present_tense_to_dictionary_form":
+      return {
+        front: getConjugationByForm(term, "presentTense"),
+        back: term.swedish,
+      };
+    case "dictionary_form_to_present_tense":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "presentTense"),
       };
     default:
       return {
@@ -90,6 +137,156 @@ export const generateQuizCardContent = (card: QuizCard): QuizCardContent => {
           </Typography>
         ),
         back: <Typography>{term.swedish}</Typography>,
+      };
+    case "dictionary_form_to_imperative":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>imperative</i> form of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>{getConjugationByForm(term, "imperative")}</Typography>
+        ),
+      };
+    case "dictionary_form_to_past_tense":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>past tense</i> of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>{getConjugationByForm(term, "pastTense")}</Typography>
+        ),
+      };
+    case "dictionary_form_to_present_tense":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>present tense</i> of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>{getConjugationByForm(term, "presentTense")}</Typography>
+        ),
+      };
+    case "dictionary_form_to_supine":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>supine</i> of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: <Typography>{getConjugationByForm(term, "supine")}</Typography>,
+      };
+    case "en_form_to_den_det_de_form":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>den/det/de</i> form of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: <Typography>{getConjugationByForm(term, "denDetDe")}</Typography>,
+      };
+    case "en_form_to_ett_form":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>ett</i> form of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: <Typography>{getConjugationByForm(term, "ett")}</Typography>,
+      };
+    case "present_tense_to_dictionary_form":
+      return {
+        front: getConjugationByForm(term, "presentTense") ? (
+          <Typography component="span">
+            What is the dictionary form of{" "}
+            <Typography component="span" fontWeight={600}>
+              {getConjugationByForm(term, "presentTense")}
+            </Typography>
+            ?
+          </Typography>
+        ) : (
+          ""
+        ),
+        back: <Typography>{term.swedish}</Typography>,
+      };
+    case "singular_indefinite_to_plural_definite":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>definite plural</i> of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>
+            {getConjugationByForm(term, "definitePlural")}
+          </Typography>
+        ),
+      };
+    case "singular_indefinite_to_plural_indefinite":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>indefinite plural</i> of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>
+            {getConjugationByForm(term, "indefinitePlural")}
+          </Typography>
+        ),
+      };
+    case "singular_indefinite_to_singular_definite":
+      return {
+        front: (
+          <Typography component="span">
+            What is the <i>singular definite</i> form of{" "}
+            <Typography component="span" fontWeight={600}>
+              {term.swedish}
+            </Typography>
+            ?
+          </Typography>
+        ),
+        back: (
+          <Typography>
+            {getConjugationByForm(term, "definiteSingular")}
+          </Typography>
+        ),
       };
     default:
       return emptyCard;

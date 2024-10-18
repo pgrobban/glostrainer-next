@@ -5,17 +5,19 @@ import { FormControl, MenuItem, Select } from "@mui/material";
 const contentToGenerateTypes: Record<string, ContentToGenerate[]> = {
   General: ["swedish_to_definition", "definition_to_swedish"],
   Nouns: [
-    "singular_indefinite_to_singular_indefinite",
+    "singular_indefinite_to_singular_definite",
     "singular_indefinite_to_plural_indefinite",
-    "singular_definite_to_plural_definite",
+    "singular_indefinite_to_plural_definite",
     "plural_indefinite_to_plural_indefinite",
   ],
   Verbs: [
     "dictionary_form_to_present_tense",
     "dictionary_form_to_past_tense",
-    "dictionary_form_to_perfect_tense",
+    "dictionary_form_to_supine",
+    "dictionary_form_to_imperative",
     "present_tense_to_dictionary_form",
   ],
+  Adjectives: ["en_form_to_ett_form", "en_form_to_den_det_de_form"],
 };
 
 interface Props {
