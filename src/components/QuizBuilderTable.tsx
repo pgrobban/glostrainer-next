@@ -62,6 +62,7 @@ const QuizBuilderTable: React.FC<Props> = ({
       <TableHead>
         <TableRow>
           <TableCell>{/* drag to reorder */}</TableCell>
+          <TableCell>Generated content</TableCell>
           <TableCell>Front</TableCell>
           <TableCell>Back</TableCell>
           <TableCell width={60}></TableCell>

@@ -1,5 +1,8 @@
 import { DeleteIcon, DragHandleIcon } from "@/helpers/icons";
-import { getGeneratedCardForTerm } from "@/helpers/quizUtils";
+import {
+  getGeneratedCardForTerm,
+  getReadableContentToGenerateLabel,
+} from "@/helpers/quizUtils";
 import { StyledTableRow } from "@/helpers/styleUtils";
 import { QuizCard } from "@/helpers/types";
 import { DraggableProvided } from "@hello-pangea/dnd";
@@ -32,6 +35,13 @@ const QuizBuilderTableRow: React.FC<Props> = memo(
       >
         <TableCell>
           <DragHandleIcon />
+        </TableCell>
+        <TableCell>
+          {card.contentToGenerate && (
+            <small>
+              {getReadableContentToGenerateLabel(card.contentToGenerate)}
+            </small>
+          )}
         </TableCell>
         <TableCell>{front}</TableCell>
         <TableCell>{back}</TableCell>

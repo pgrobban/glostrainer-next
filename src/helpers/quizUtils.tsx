@@ -36,6 +36,11 @@ export const getGeneratedCardForTerm = (
         front: term.definition,
         back: term.swedish,
       };
+    case "dictionary_form_to_supine":
+      return {
+        front: term.swedish,
+        back: getConjugationByForm(term, "supine"),
+      };
     case "singular_indefinite_to_singular_definite":
       return {
         front: term.swedish,

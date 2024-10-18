@@ -104,13 +104,13 @@ const QuizPlayerDialog: React.FC<Props> = ({ open, onClose, quizId }) => {
         </Toolbar>
       </AppBar>
 
-      <DialogContent sx={{ width: ["100%", 350], minHeight: 100 }}>
+      <DialogContent sx={{ width: ["100%", 350], minHeight: 150 }}>
         {currentCard && content && (
           <ReactCardFlip isFlipped={viewingCardSide === "back"}>
-            <Card key="front">
+            <Card sx={{ minHeight: 150 }} key="front">
               <CardContent>{(content as QuizCardContent).front}</CardContent>
             </Card>
-            <Card key="back">
+            <Card sx={{ minHeight: 150 }} key="back">
               <CardContent>{(content as QuizCardContent).back}</CardContent>
             </Card>
           </ReactCardFlip>
